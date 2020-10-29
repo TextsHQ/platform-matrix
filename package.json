@@ -1,0 +1,30 @@
+{
+  "name": "@textshq/platform-matrix",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "prepare": "yarn tsc",
+    "postinstall": "yarn tsc || true",
+    "build": "yarn tsc",
+    "lint": "eslint src --ext ts,tsx,js,jsx --cache"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn lint --fix || true; git add ."
+    }
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "lodash": "^4.17.19"
+  },
+  "peerDependencies": {
+    "@textshq/platform-sdk": "link:../platform-sdk"
+  },
+  "devDependencies": {
+    "@textshq/eslint-config": "link:../eslint-config",
+    "@textshq/platform-sdk": "link:../platform-sdk",
+    "eslint": "^7.6.0",
+    "husky": "^4.2.5",
+    "typescript": "^3.9.7"
+  }
+}
