@@ -19,17 +19,31 @@ import {
   texts,
   AccountInfo,
 } from '@textshq/platform-sdk'
+import MatrixAPI, { MatrixSession } from './api'
 
-export default class MatrixAPI implements PlatformAPI {
-  currentUser = null
+export default class Matrix implements PlatformAPI {
+  api = new MatrixAPI()
+  session
 
-  init = async (session, accountInfo: AccountInfo) => {}
+  init = async (session: MatrixSession, accountInfo: AccountInfo) => {
+    if (session?.access_token) {
+      this.session = session
+      this.api.startFromSession(session)
+    }
+  }
 
   getAuthUrl = async callback => {}
 
   login = async (creds): Promise<LoginResult> => {
-    this.currentUser = creds.username
-    return { type: 'success' }
+    console.log('-- login', creds)
+    const res = await this.api.login(creds)
+    if (res.access_token) {
+      this.api.start()
+      this.session = res
+      return { type: 'success' }
+    } else if (res.error) {
+      return { type: 'error', errorMessage: res.error }
+    }
   }
 
   logout = () => {}
@@ -37,8 +51,8 @@ export default class MatrixAPI implements PlatformAPI {
   dispose = () => {}
 
   getCurrentUser = (): CurrentUser => ({
-    id: this.currentUser,
-    displayText: this.currentUser,
+    id: this.session.user_id,
+    displayText: this.session.user_id,
   })
 
   subscribeToEvents = (onEvent: OnServerEventCallback) => {}
@@ -46,7 +60,7 @@ export default class MatrixAPI implements PlatformAPI {
   unsubscribeToEvents = () => {}
 
   serializeSession = () => {
-    return this.currentUser
+    return this.session
   }
 
   searchUsers = async (typed: string) => []
