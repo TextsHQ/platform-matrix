@@ -1,9 +1,13 @@
-import { Attribute, MessageDeletionMode, Platform } from '@textshq/platform-sdk'
+import {
+  Attribute,
+  MessageDeletionMode,
+  PlatformInfo,
+} from '@textshq/platform-sdk'
 
 import { mapMessage } from './mappers'
 import { AuthForm } from './AuthForm'
 
-const info: Platform = {
+const info: PlatformInfo = {
   name: 'matrix',
   version: '1.0.0',
   displayName: 'Matrix',
@@ -14,7 +18,9 @@ const info: Platform = {
 </svg>`,
   loginMode: 'custom',
   auth: AuthForm,
-  supportedReactions: {},
+  reactions: {
+    supported: {},
+  },
   deletionMode: MessageDeletionMode.NONE,
   typingDurationMs: 3000,
   attributes: new Set([]),
