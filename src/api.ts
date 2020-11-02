@@ -19,16 +19,18 @@ import {
   texts,
   AccountInfo,
 } from '@textshq/platform-sdk'
-import MatrixAPI, { MatrixSession } from './matrix-api'
+import MatrixClient, { MatrixSession } from './matrix-client'
+import { mapRoom } from './mappers'
 
 export default class Matrix implements PlatformAPI {
-  api = new MatrixAPI()
+  matrixClient = new MatrixClient()
   session
+  threads = {}
 
   init = async (session: MatrixSession, accountInfo: AccountInfo) => {
     if (session?.access_token) {
       this.session = session
-      this.api.startFromSession(session)
+      this.matrixClient.startFromSession(session)
     }
   }
 
@@ -36,9 +38,9 @@ export default class Matrix implements PlatformAPI {
 
   login = async (creds): Promise<LoginResult> => {
     console.log('-- login', creds)
-    const res = await this.api.login(creds)
+    const res = await this.matrixClient.login(creds)
     if (res.access_token) {
-      this.api.start()
+      this.matrixClient.start()
       this.session = res
       return { type: 'success' }
     } else if (res.error) {
@@ -55,7 +57,32 @@ export default class Matrix implements PlatformAPI {
     displayText: this.session.user_id,
   })
 
-  subscribeToEvents = (onEvent: OnServerEventCallback) => {}
+  mapEvent = async (type, payload): Promise<ServerEvent> => {
+    console.log('-- mapEvent', type, payload)
+    switch (type) {
+      case 'room': {
+        const data = mapRoom(payload)
+        this.threads[data.id] = data
+        return {
+          type: ServerEventType.STATE_SYNC,
+          objectID: [data.id],
+          mutationType: 'created',
+          objectName: 'thread',
+          data,
+        }
+      }
+    }
+  }
+
+  subscribeToEvents = (onEvent: OnServerEventCallback) => {
+    // this.onEvent = onEvent
+    this.matrixClient.onMessage = async (type, data) => {
+      const event = await this.mapEvent(type, data)
+      if (event) {
+        onEvent([event])
+      }
+    }
+  }
 
   unsubscribeToEvents = () => {}
 
@@ -69,7 +96,7 @@ export default class Matrix implements PlatformAPI {
 
   getThreads = async (inboxName: InboxName): Promise<Paginated<Thread>> => {
     return {
-      items: [],
+      items: Object.values(this.threads),
       hasMore: false,
       oldestCursor: null,
     }

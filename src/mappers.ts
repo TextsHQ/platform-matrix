@@ -16,6 +16,28 @@ import {
   UNKNOWN_DATE,
 } from '@textshq/platform-sdk'
 
+export function mapRoom(room: any): Thread {
+  let participantItems = []
+  return {
+    id: room.roomId,
+    title: room.name,
+    isUnread: false,
+    isReadOnly: false,
+    type: 'group',
+    timestamp: new Date(),
+    messages: {
+      items: [],
+      hasMore: false,
+      oldestCursor: null,
+    },
+    participants: {
+      items: participantItems,
+      hasMore: false,
+      oldestCursor: null,
+    },
+  }
+}
+
 export function mapMessage(
   msg: any,
   senderID: string,

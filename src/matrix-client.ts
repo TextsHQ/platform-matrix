@@ -8,8 +8,9 @@ export type MatrixSession = {
   home_server: string
 }
 
-export default class MatrixAPI {
+export default class MatrixClient {
   client
+  onMessage: Function
 
   async login({ custom: server, username: user, password }: LoginCreds) {
     this.client = sdk.createClient(server)
@@ -47,7 +48,7 @@ export default class MatrixAPI {
   onPrepared() {
     var rooms = this.client.getRooms()
     rooms.forEach(room => {
-      console.log(room)
+      this.onMessage('room', room)
     })
     this.client.on('Room.timeline', (event, room, toStartOfTimeline) => {
       console.log('timeline', event.event)
