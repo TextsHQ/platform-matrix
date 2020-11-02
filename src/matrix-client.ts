@@ -1,0 +1,61 @@
+import sdk from 'matrix-js-sdk'
+
+import { LoginCreds } from '@textshq/platform-sdk'
+
+export type MatrixSession = {
+  user_id: string
+  access_token: string
+  home_server: string
+}
+
+export default class MatrixClient {
+  client
+  onMessage: Function
+
+  async login({ custom: server, username: user, password }: LoginCreds) {
+    this.client = sdk.createClient(server)
+    try {
+      const res = await this.client.login('m.login.password', {
+        user,
+        password,
+      })
+      return res
+    } catch (e) {
+      return e.data
+    }
+  }
+
+  startFromSession(session: MatrixSession) {
+    this.client = sdk.createClient({
+      baseUrl: `https://${session.home_server}`,
+      accessToken: session.access_token,
+      userId: session.user_id,
+    })
+    this.start()
+  }
+
+  start() {
+    this.client.startClient()
+    this.client.once('sync', (state, prevState, res) => {
+      // state will be 'PREPARED' when the client is ready to use
+      console.log('sync', state)
+      if (state == 'PREPARED') {
+        this.onPrepared()
+      }
+    })
+  }
+
+  onPrepared() {
+    var rooms = this.client.getRooms()
+    rooms.forEach(room => {
+      this.onMessage('Room', room)
+    })
+    this.client.on('Room.timeline', (event, room, toStartOfTimeline) => {
+      this.onMessage('Room.timeline', event)
+    })
+  }
+
+  sendTextMessage(roomId, text) {
+    this.client.sendTextMessage(roomId, text)
+  }
+}
