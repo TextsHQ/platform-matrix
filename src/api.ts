@@ -20,7 +20,7 @@ import {
   AccountInfo,
 } from '@textshq/platform-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
-import { mapRoom } from './mappers'
+import { mapRoom, mapMessage } from './mappers'
 
 export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
@@ -60,7 +60,7 @@ export default class Matrix implements PlatformAPI {
   mapEvent = async (type, payload): Promise<ServerEvent> => {
     console.log('-- mapEvent', type, payload)
     switch (type) {
-      case 'room': {
+      case 'Room': {
         const data = mapRoom(payload)
         this.threads[data.id] = data
         return {
@@ -68,6 +68,17 @@ export default class Matrix implements PlatformAPI {
           objectID: [data.id],
           mutationType: 'created',
           objectName: 'thread',
+          data,
+        }
+      }
+      case 'Room.timeline': {
+        const data = mapMessage(payload)
+        if (!data) return
+        return {
+          type: ServerEventType.STATE_SYNC,
+          objectID: [payload.room.roomId, data.id],
+          mutationType: 'created',
+          objectName: 'message',
           data,
         }
       }

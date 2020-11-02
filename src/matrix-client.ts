@@ -48,10 +48,10 @@ export default class MatrixClient {
   onPrepared() {
     var rooms = this.client.getRooms()
     rooms.forEach(room => {
-      this.onMessage('room', room)
+      this.onMessage('Room', { room })
     })
     this.client.on('Room.timeline', (event, room, toStartOfTimeline) => {
-      console.log('timeline', event.event)
+      this.onMessage('Room.timeline', { event, room })
     })
   }
 }

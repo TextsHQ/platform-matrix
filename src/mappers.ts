@@ -16,7 +16,7 @@ import {
   UNKNOWN_DATE,
 } from '@textshq/platform-sdk'
 
-export function mapRoom(room: any): Thread {
+export function mapRoom({ room }): Thread {
   let participantItems = []
   return {
     id: room.roomId,
@@ -38,10 +38,22 @@ export function mapRoom(room: any): Thread {
   }
 }
 
-export function mapMessage(
-  msg: any,
-  senderID: string,
-  isSender: boolean
-): Message {
-  return
+export function mapMessage({ event, room }): Message {
+  let body
+  if (event.getType() === 'm.room.message') {
+    body = event.getContent().body
+  } else {
+    return null
+  }
+
+  return {
+    _original: [],
+    id: event.getId(),
+    timestamp: new Date(event.getTs()),
+    senderID: event.getSender(),
+    text: body,
+    isSender: false,
+    attachments: [],
+    reactions: [],
+  }
 }
