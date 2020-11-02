@@ -16,8 +16,9 @@ import {
   UNKNOWN_DATE,
 } from '@textshq/platform-sdk'
 
-export function mapRoom({ room }): Thread {
+export function mapRoom(room): Thread {
   let participantItems = []
+  const messages = room.timeline.map(mapMessage).filter(Boolean)
   return {
     id: room.roomId,
     title: room.name,
@@ -26,7 +27,7 @@ export function mapRoom({ room }): Thread {
     type: 'group',
     timestamp: new Date(),
     messages: {
-      items: [],
+      items: messages,
       hasMore: false,
       oldestCursor: null,
     },
@@ -38,7 +39,7 @@ export function mapRoom({ room }): Thread {
   }
 }
 
-export function mapMessage({ event, room }): Message {
+export function mapMessage(event): Message {
   let body
   if (event.getType() === 'm.room.message') {
     body = event.getContent().body
