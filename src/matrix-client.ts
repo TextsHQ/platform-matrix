@@ -54,4 +54,8 @@ export default class MatrixClient {
       this.onMessage('Room.timeline', event)
     })
   }
+
+  sendTextMessage(roomId, text) {
+    this.client.sendTextMessage(roomId, text)
+  }
 }

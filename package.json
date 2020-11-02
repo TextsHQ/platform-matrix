@@ -22,7 +22,7 @@
     "@textshq/platform-sdk": "link:../platform-sdk"
   },
   "devDependencies": {
-    "@textshq/eslint-config": "link:../eslint-config",
+    "@textshq/eslint-config": "git+ssh://git@github.com:TextsHQ/eslint-config",
     "@textshq/platform-sdk": "link:../platform-sdk",
     "eslint": "^7.6.0",
     "husky": "^4.2.5",

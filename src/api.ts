@@ -27,6 +27,10 @@ export default class Matrix implements PlatformAPI {
   session
   threads = {}
 
+  get userID() {
+    return this.session?.user_id
+  }
+
   init = async (session: MatrixSession, accountInfo: AccountInfo) => {
     if (session?.access_token) {
       this.session = session
@@ -61,7 +65,7 @@ export default class Matrix implements PlatformAPI {
     console.log('-- mapEvent', type, payload)
     switch (type) {
       case 'Room': {
-        const data = mapRoom(payload)
+        const data = mapRoom(this.userID, payload)
         this.threads[data.id] = data
         return {
           type: ServerEventType.STATE_SYNC,
@@ -72,7 +76,7 @@ export default class Matrix implements PlatformAPI {
         }
       }
       case 'Room.timeline': {
-        const data = mapMessage(payload)
+        const data = mapMessage(this.userID, payload)
         if (!data) return
         return {
           type: ServerEventType.STATE_SYNC,
@@ -128,6 +132,7 @@ export default class Matrix implements PlatformAPI {
     content: MessageContent,
     options: MessageSendOptions
   ) => {
+    this.matrixClient.sendTextMessage(threadID, content.text)
     return true
   }
 
