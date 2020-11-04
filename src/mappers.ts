@@ -42,6 +42,16 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   }
 }
 
+const getAttachmentTypeFromContentType = type => {
+  return (
+    {
+      'm.image': MessageAttachmentType.IMG,
+      'm.audio': MessageAttachmentType.AUDIO,
+      'm.video': MessageAttachmentType.VIDEO,
+    }[type] || MessageAttachmentType.UNKNOWN
+  )
+}
+
 export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
   let text
   let action = null
@@ -81,13 +91,15 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
     case 'm.room.message': {
       const content = event.getContent()
       switch (content.msgtype) {
+        case 'm.bad.encrypted':
         case 'm.text': {
           text = content.body
           break
         }
-        case 'm.image': {
-          console.log(content.info)
-          text = content.body
+        case 'm.audio':
+        case 'm.file':
+        case 'm.image':
+        case 'm.video': {
           const srcURL = matrixClient.mxcUrlToHttp(
             content.url,
             content.info.w,
@@ -96,7 +108,7 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
           attachments = [
             {
               id: event.getId(),
-              type: MessageAttachmentType.IMG,
+              type: getAttachmentTypeFromContentType(content.msgtype),
               isGif: content.info.mimetype == 'image/gif',
               size: { width: content.info.w, height: content.info.h },
               srcURL,
