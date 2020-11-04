@@ -65,7 +65,7 @@ export default class Matrix implements PlatformAPI {
     console.log('-- mapEvent', type, payload)
     switch (type) {
       case 'Room': {
-        const data = mapRoom(this.userID, payload)
+        const data = mapRoom(this.matrixClient, this.userID, payload)
         this.threads[data.id] = data
         return {
           type: ServerEventType.STATE_SYNC,
@@ -76,7 +76,7 @@ export default class Matrix implements PlatformAPI {
         }
       }
       case 'Room.timeline': {
-        const data = mapMessage(this.userID, payload)
+        const data = mapMessage(this.matrixClient, this.userID, payload)
         if (!data) return
         return {
           type: ServerEventType.STATE_SYNC,

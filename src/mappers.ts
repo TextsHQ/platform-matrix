@@ -15,10 +15,13 @@ import {
   StateSyncEvent,
   UNKNOWN_DATE,
 } from '@textshq/platform-sdk'
+import MatrixClient from './matrix-client'
 
-export function mapRoom(userID, room): Thread {
+export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   let participantItems = []
-  const messages = room.timeline.map(e => mapMessage(userID, e)).filter(Boolean)
+  const messages = room.timeline
+    .map(e => mapMessage(matrixClient, userID, e))
+    .filter(Boolean)
   return {
     id: room.roomId,
     title: room.name,
@@ -39,9 +42,10 @@ export function mapRoom(userID, room): Thread {
   }
 }
 
-export function mapMessage(userID, event): Message {
+export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
   let text
   let action = null
+  let attachments = []
   const senderID = event.getSender()
 
   switch (event.getType()) {
@@ -64,7 +68,7 @@ export function mapMessage(userID, event): Message {
         type = MessageActionType.THREAD_PARTICIPANTS_REMOVED
         text = `${senderID} left the room`
       } else {
-        console.log('-- m.room.member', event)
+        console.log('m.room.member', event)
         return null
       }
       action = {
@@ -75,7 +79,38 @@ export function mapMessage(userID, event): Message {
       break
     }
     case 'm.room.message': {
-      text = event.getContent().body
+      const content = event.getContent()
+      switch (content.msgtype) {
+        case 'm.text': {
+          text = content.body
+          break
+        }
+        case 'm.image': {
+          console.log(content.info)
+          text = content.body
+          const srcURL = matrixClient.mxcUrlToHttp(
+            content.url,
+            content.info.w,
+            content.info.h
+          )
+          attachments = [
+            {
+              id: event.getId(),
+              type: MessageAttachmentType.IMG,
+              isGif: content.info.mimetype == 'image/gif',
+              size: { width: content.info.w, height: content.info.h },
+              srcURL,
+              mimeType: content.info.mimeType,
+              fileName: content.body,
+              fileSize: content.info.size,
+            },
+          ]
+          break
+        }
+        default: {
+          console.log('m.room.message', event)
+        }
+      }
       break
     }
     case 'm.room.name': {
@@ -111,7 +146,7 @@ export function mapMessage(userID, event): Message {
     senderID,
     text,
     isSender: userID == senderID,
-    attachments: [],
+    attachments,
     isAction: !!action,
     action,
     reactions: [],
