@@ -111,11 +111,7 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
         case 'm.file':
         case 'm.image':
         case 'm.video': {
-          const srcURL = matrixClient.mxcUrlToHttp(
-            content.url,
-            content.info.w,
-            content.info.h
-          )
+          const srcURL = matrixClient.mxcUrlToHttp(content.url)
           attachments = [
             {
               id: event.getId(),

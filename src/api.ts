@@ -143,7 +143,13 @@ export default class Matrix implements PlatformAPI {
       const msgContent = {
         msgtype: getContentTypeFromMimeType(content.mimeType),
         url,
-        info: { mimetype: content.mimeType },
+        info: {
+          mimetype: content.mimeType,
+          size: attachmentBuffer.byteLength,
+          // height/width required to preview in Element.
+          // h: 60,
+          // w: 60,
+        },
         body: content.text || content.fileName,
       }
       this.matrixClient.sendMessage(threadID, msgContent)
