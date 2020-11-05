@@ -20,7 +20,7 @@ import {
   AccountInfo,
 } from '@textshq/platform-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
-import { mapRoom, mapMessage } from './mappers'
+import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
 
 export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
@@ -132,7 +132,24 @@ export default class Matrix implements PlatformAPI {
     content: MessageContent,
     options: MessageSendOptions
   ) => {
-    this.matrixClient.sendTextMessage(threadID, content.text)
+    let attachmentBuffer
+    if (content.filePath) {
+      attachmentBuffer = await fs.readFile(content.filePath)
+    } else if (content.fileBuffer) {
+      attachmentBuffer = content.fileBuffer
+    }
+    if (attachmentBuffer) {
+      const url = await this.matrixClient.upload(attachmentBuffer)
+      const msgContent = {
+        msgtype: getContentTypeFromMimeType(content.mimeType),
+        url,
+        info: { mimetype: content.mimeType },
+        body: content.text || content.fileName,
+      }
+      this.matrixClient.sendMessage(threadID, msgContent)
+    } else {
+      this.matrixClient.sendTextMessage(threadID, content.text)
+    }
     return true
   }
 

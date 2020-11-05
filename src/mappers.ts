@@ -52,6 +52,17 @@ const getAttachmentTypeFromContentType = type => {
   )
 }
 
+export const getContentTypeFromMimeType = mimeType => {
+  const mainType = mimeType.split('/')[0]
+  return (
+    {
+      image: 'm.image',
+      audio: 'm.audio',
+      video: 'm.video',
+    }[mainType] || 'm.file'
+  )
+}
+
 export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
   let text
   let action = null

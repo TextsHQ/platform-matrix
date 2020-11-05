@@ -60,11 +60,22 @@ export default class MatrixClient {
     })
   }
 
+  sendMessage(...args) {
+    this.client.sendMessage(...args)
+  }
+
   sendTextMessage(roomId, text) {
     this.client.sendTextMessage(roomId, text)
   }
 
   mxcUrlToHttp(...args) {
     return this.client.mxcUrlToHttp(...args)
+  }
+
+  upload(file) {
+    return this.client._http.uploadContent(file, {
+      rawResponse: false,
+      onlyContentUri: true,
+    })
   }
 }
