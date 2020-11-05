@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import bluebird from 'bluebird'
+import sizeOf from 'image-size'
 import {
   PlatformAPI,
   OnServerEventCallback,
@@ -21,6 +22,7 @@ import {
 } from '@textshq/platform-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
 import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
+import { ContentInfo } from './types/matrix'
 
 export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
@@ -140,16 +142,23 @@ export default class Matrix implements PlatformAPI {
     }
     if (attachmentBuffer) {
       const url = await this.matrixClient.upload(attachmentBuffer)
+      const msgtype = getContentTypeFromMimeType(content.mimeType)
+      const info: ContentInfo = {
+        mimetype: content.mimeType,
+        size: attachmentBuffer.byteLength,
+      }
+      if (msgtype == 'm.image') {
+        const dimension = sizeOf(attachmentBuffer)
+        if (dimension) {
+          // height/width are required to preview in Element.
+          info.h = dimension.height
+          info.w = dimension.width
+        }
+      }
       const msgContent = {
-        msgtype: getContentTypeFromMimeType(content.mimeType),
+        msgtype,
         url,
-        info: {
-          mimetype: content.mimeType,
-          size: attachmentBuffer.byteLength,
-          // height/width required to preview in Element.
-          // h: 60,
-          // w: 60,
-        },
+        info,
         body: content.text || content.fileName,
       }
       this.matrixClient.sendMessage(threadID, msgContent)
