@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import bluebird from 'bluebird'
+import sizeOf from 'image-size'
 import {
   PlatformAPI,
   OnServerEventCallback,
@@ -20,7 +21,8 @@ import {
   AccountInfo,
 } from '@textshq/platform-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
-import { mapRoom, mapMessage } from './mappers'
+import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
+import { ContentInfo } from './types/matrix'
 
 export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
@@ -65,7 +67,7 @@ export default class Matrix implements PlatformAPI {
     console.log('-- mapEvent', type, payload)
     switch (type) {
       case 'Room': {
-        const data = mapRoom(this.userID, payload)
+        const data = mapRoom(this.matrixClient, this.userID, payload)
         this.threads[data.id] = data
         return {
           type: ServerEventType.STATE_SYNC,
@@ -76,7 +78,7 @@ export default class Matrix implements PlatformAPI {
         }
       }
       case 'Room.timeline': {
-        const data = mapMessage(this.userID, payload)
+        const data = mapMessage(this.matrixClient, this.userID, payload)
         if (!data) return
         return {
           type: ServerEventType.STATE_SYNC,
@@ -132,7 +134,37 @@ export default class Matrix implements PlatformAPI {
     content: MessageContent,
     options: MessageSendOptions
   ) => {
-    this.matrixClient.sendTextMessage(threadID, content.text)
+    let attachmentBuffer
+    if (content.filePath) {
+      attachmentBuffer = await fs.readFile(content.filePath)
+    } else if (content.fileBuffer) {
+      attachmentBuffer = content.fileBuffer
+    }
+    if (attachmentBuffer) {
+      const url = await this.matrixClient.upload(attachmentBuffer)
+      const msgtype = getContentTypeFromMimeType(content.mimeType)
+      const info: ContentInfo = {
+        mimetype: content.mimeType,
+        size: attachmentBuffer.byteLength,
+      }
+      if (msgtype == 'm.image') {
+        const dimension = sizeOf(attachmentBuffer)
+        if (dimension) {
+          // height/width are required to preview in Element.
+          info.h = dimension.height
+          info.w = dimension.width
+        }
+      }
+      const msgContent = {
+        msgtype,
+        url,
+        info,
+        body: content.text || content.fileName,
+      }
+      this.matrixClient.sendMessage(threadID, msgContent)
+    } else {
+      this.matrixClient.sendTextMessage(threadID, content.text)
+    }
     return true
   }
 

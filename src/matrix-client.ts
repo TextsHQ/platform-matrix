@@ -6,6 +6,11 @@ export type MatrixSession = {
   user_id: string
   access_token: string
   home_server: string
+  well_known: {
+    'm.homeserver': {
+      base_url: string
+    }
+  }
 }
 
 export default class MatrixClient {
@@ -55,7 +60,22 @@ export default class MatrixClient {
     })
   }
 
+  sendMessage(...args) {
+    this.client.sendMessage(...args)
+  }
+
   sendTextMessage(roomId, text) {
     this.client.sendTextMessage(roomId, text)
+  }
+
+  mxcUrlToHttp(...args) {
+    return this.client.mxcUrlToHttp(...args)
+  }
+
+  upload(file) {
+    return this.client._http.uploadContent(file, {
+      rawResponse: false,
+      onlyContentUri: true,
+    })
   }
 }
