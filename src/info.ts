@@ -21,7 +21,7 @@ const info: PlatformInfo = {
   reactions: {
     supported: {},
   },
-  deletionMode: MessageDeletionMode.NONE,
+  deletionMode: MessageDeletionMode.DELETE_FOR_EVERYONE,
   typingDurationMs: 3000,
   attributes: new Set([]),
   mapMessage,

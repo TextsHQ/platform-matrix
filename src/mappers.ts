@@ -20,7 +20,7 @@ import MatrixClient from './matrix-client'
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   let participantItems = []
   const messages = room.timeline
-    .map(e => mapMessage(matrixClient, userID, e))
+    .map(event => mapMessage(matrixClient, userID, room, event))
     .filter(Boolean)
   return {
     id: room.roomId,
@@ -63,10 +63,16 @@ export const getContentTypeFromMimeType = mimeType => {
   )
 }
 
-export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
+export function mapMessage(
+  matrixClient: MatrixClient,
+  userID,
+  room,
+  event
+): Message {
   let text
   let action = null
   let attachments = []
+  let isDeleted = false
   const senderID = event.getSender()
 
   switch (event.getType()) {
@@ -100,6 +106,15 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
       break
     }
     case 'm.room.message': {
+      if (event.isRedacted()) {
+        const byEvent = room.findEventById(event.getUnsigned().redacted_by)
+        if (!byEvent) {
+          return
+        }
+        isDeleted = true
+        text = `Message deleted by ${byEvent.getSender()}`
+        break
+      }
       const content = event.getContent()
       switch (content.msgtype) {
         case 'm.bad.encrypted':
@@ -144,7 +159,6 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
         type = MessageActionType.GROUP_THREAD_CREATED
         text = `${senderID} created and configured the room`
       }
-      // console.log('m.room.name', event.getPrevContent())
       action = {
         type,
         title: event.getContent().name,
@@ -152,9 +166,13 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
       }
       break
     }
+    case 'm.room.redaction': {
+      // The change has already been rendered in the redacted event.
+      return
+    }
     default: {
       console.log('-- mapMessage', event)
-      return null
+      return
     }
   }
 
@@ -168,6 +186,7 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
     attachments,
     isAction: !!action,
     action,
+    isDeleted,
     reactions: [],
   }
 }
