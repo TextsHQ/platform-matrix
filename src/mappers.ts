@@ -144,7 +144,6 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
         type = MessageActionType.GROUP_THREAD_CREATED
         text = `${senderID} created and configured the room`
       }
-      // console.log('m.room.name', event.getPrevContent())
       action = {
         type,
         title: event.getContent().name,
@@ -152,9 +151,16 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
       }
       break
     }
+    case 'm.room.redaction': {
+      console.log('-- m.room.redaction', event)
+      // text = `Message deleted by ${senderID}`
+      // The change has already been rendered in the redacted event.
+      return
+      break
+    }
     default: {
       console.log('-- mapMessage', event)
-      return null
+      return
     }
   }
 

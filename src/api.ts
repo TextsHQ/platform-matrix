@@ -189,6 +189,8 @@ export default class Matrix implements PlatformAPI {
   ) => {}
 
   deleteMessage = async (threadID: string, messageID: string) => {
+    console.log('-- deleteMessage')
+    await this.matrixClient.redactEvent(threadID, messageID)
     return true
   }
 

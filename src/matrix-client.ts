@@ -78,4 +78,8 @@ export default class MatrixClient {
       onlyContentUri: true,
     })
   }
+
+  redactEvent(...args) {
+    return this.client.redactEvent(...args)
+  }
 }
