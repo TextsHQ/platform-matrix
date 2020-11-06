@@ -78,7 +78,12 @@ export default class Matrix implements PlatformAPI {
         }
       }
       case 'Room.timeline': {
-        const data = mapMessage(this.matrixClient, this.userID, payload)
+        const data = mapMessage(
+          this.matrixClient,
+          this.userID,
+          payload.room,
+          payload.event
+        )
         if (!data) return
         return {
           type: ServerEventType.STATE_SYNC,

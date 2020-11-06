@@ -20,7 +20,7 @@ import MatrixClient from './matrix-client'
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   let participantItems = []
   const messages = room.timeline
-    .map(e => mapMessage(matrixClient, userID, e))
+    .map(event => mapMessage(matrixClient, userID, room, event))
     .filter(Boolean)
   return {
     id: room.roomId,
@@ -63,7 +63,12 @@ export const getContentTypeFromMimeType = mimeType => {
   )
 }
 
-export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
+export function mapMessage(
+  matrixClient: MatrixClient,
+  userID,
+  room,
+  event
+): Message {
   let text
   let action = null
   let attachments = []
@@ -100,6 +105,14 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
       break
     }
     case 'm.room.message': {
+      if (event.isRedacted()) {
+        const byEvent = room.findEventById(event.getUnsigned().redacted_by)
+        if (!byEvent) {
+          return
+        }
+        text = `Message deleted by ${byEvent.getSender()}`
+        break
+      }
       const content = event.getContent()
       switch (content.msgtype) {
         case 'm.bad.encrypted':
@@ -152,11 +165,8 @@ export function mapMessage(matrixClient: MatrixClient, userID, event): Message {
       break
     }
     case 'm.room.redaction': {
-      console.log('-- m.room.redaction', event)
-      // text = `Message deleted by ${senderID}`
       // The change has already been rendered in the redacted event.
       return
-      break
     }
     default: {
       console.log('-- mapMessage', event)

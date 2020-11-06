@@ -56,7 +56,7 @@ export default class MatrixClient {
       this.onMessage('Room', room)
     })
     this.client.on('Room.timeline', (event, room, toStartOfTimeline) => {
-      this.onMessage('Room.timeline', event)
+      this.onMessage('Room.timeline', { room, event })
     })
   }
 
