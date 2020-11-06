@@ -72,6 +72,7 @@ export function mapMessage(
   let text
   let action = null
   let attachments = []
+  let isDeleted = false
   const senderID = event.getSender()
 
   switch (event.getType()) {
@@ -110,6 +111,7 @@ export function mapMessage(
         if (!byEvent) {
           return
         }
+        isDeleted = true
         text = `Message deleted by ${byEvent.getSender()}`
         break
       }
@@ -184,6 +186,7 @@ export function mapMessage(
     attachments,
     isAction: !!action,
     action,
+    isDeleted,
     reactions: [],
   }
 }
