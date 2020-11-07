@@ -87,7 +87,7 @@ export default class Matrix implements PlatformAPI {
         if (!data) return
         return {
           type: ServerEventType.STATE_SYNC,
-          objectID: [payload.getRoomId(), data.id],
+          objectID: [payload.room.roomId, data.id],
           mutationType: 'created',
           objectName: 'message',
           data,
