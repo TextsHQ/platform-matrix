@@ -23,7 +23,7 @@ const info: PlatformInfo = {
   },
   deletionMode: MessageDeletionMode.DELETE_FOR_EVERYONE,
   typingDurationMs: 3000,
-  attributes: new Set([]),
+  attributes: new Set([Attribute.SUPPORTS_QUOTED_MESSAGES]),
   mapMessage,
 }
 

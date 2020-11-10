@@ -139,6 +139,7 @@ export default class Matrix implements PlatformAPI {
     content: MessageContent,
     options: MessageSendOptions
   ) => {
+    let msgContent
     let attachmentBuffer
     if (content.filePath) {
       attachmentBuffer = await fs.readFile(content.filePath)
@@ -160,16 +161,26 @@ export default class Matrix implements PlatformAPI {
           info.w = dimension.width
         }
       }
-      const msgContent = {
+      msgContent = {
         msgtype,
         url,
         info,
         body: content.text || content.fileName,
       }
-      this.matrixClient.sendMessage(threadID, msgContent)
     } else {
-      this.matrixClient.sendTextMessage(threadID, content.text)
+      msgContent = {
+        msgtype: 'm.text',
+        body: content.text,
+      }
     }
+    if (options.quotedMessageID) {
+      msgContent['m.relates_to'] = {
+        'm.in_reply_to': {
+          event_id: options.quotedMessageID,
+        },
+      }
+    }
+    this.matrixClient.sendMessage(threadID, msgContent)
     return true
   }
 
