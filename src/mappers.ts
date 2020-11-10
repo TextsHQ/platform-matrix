@@ -63,6 +63,25 @@ export const getContentTypeFromMimeType = mimeType => {
   )
 }
 
+/**
+ * This function strips the original message body from quoting message body.
+ * Input: '> <@id:matrix.org> a\n> \n> b\n> \n> c\n\nd\n\ne'
+ * Output: 'd\n\ne'
+ */
+const stripQuotedMessage = body => {
+  if (body.startsWith('\n')) {
+    return body.slice(1)
+  } else if (!body.startsWith('> ')) {
+    return body
+  }
+
+  let linebreak = body.indexOf('\n')
+  if (linebreak !== -1) {
+    return stripQuotedMessage(body.slice(linebreak + 1))
+  }
+  return body
+}
+
 export function mapMessage(
   matrixClient: MatrixClient,
   userID,
@@ -73,6 +92,7 @@ export function mapMessage(
   let action = null
   let attachments = []
   let isDeleted = false
+  let linkedMessageID
   const senderID = event.getSender()
 
   switch (event.getType()) {
@@ -120,6 +140,14 @@ export function mapMessage(
         case 'm.bad.encrypted':
         case 'm.text': {
           text = content.body
+          if (
+            content['m.relates_to'] &&
+            content['m.relates_to']['m.in_reply_to']
+          ) {
+            text = stripQuotedMessage(content.body)
+            linkedMessageID = content['m.relates_to']['m.in_reply_to'].event_id
+          }
+
           break
         }
         case 'm.audio':
@@ -188,5 +216,6 @@ export function mapMessage(
     action,
     isDeleted,
     reactions: [],
+    linkedMessageID,
   }
 }
