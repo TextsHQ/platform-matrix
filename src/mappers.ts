@@ -91,6 +91,7 @@ export function mapMessage(
   let text
   let action = null
   let attachments = []
+  let reactions = []
   let isDeleted = false
   let linkedMessageID
   const senderID = event.getSender()
@@ -126,6 +127,19 @@ export function mapMessage(
       break
     }
     case 'm.room.message': {
+      const annotationRelations = room
+        .getUnfilteredTimelineSet()
+        .getRelationsForEvent(event.getId(), 'm.annotation', 'm.reaction')
+      if (annotationRelations) {
+        reactions = annotationRelations.getRelations().map(event => {
+          return {
+            id: event.getId(),
+            reactionKey: event.getRelation().key,
+            participantID: event.getSender(),
+            emoji: true,
+          }
+        })
+      }
       if (event.isRedacted()) {
         const byEvent = room.findEventById(event.getUnsigned().redacted_by)
         if (!byEvent) {
@@ -195,6 +209,8 @@ export function mapMessage(
       break
     }
     case 'm.reaction': {
+      // Handled by getRelationsForEvent in m.room.message.
+      return
       const related = event.getContent()['m.relates_to']
       const origEvent = room.findEventById(related.event_id)
       if (!origEvent) {
@@ -210,7 +226,7 @@ export function mapMessage(
       return message
     }
     case 'm.room.redaction': {
-      // The change has already been rendered in the redacted event.
+      // Handled by event.isRedacted in m.room.message
       return
     }
     default: {
@@ -230,7 +246,7 @@ export function mapMessage(
     isAction: !!action,
     action,
     isDeleted,
-    reactions: [],
+    reactions,
     linkedMessageID,
   }
 }

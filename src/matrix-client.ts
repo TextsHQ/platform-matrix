@@ -18,7 +18,10 @@ export default class MatrixClient {
   onMessage: Function
 
   async login({ custom: server, username: user, password }: LoginCreds) {
-    this.client = sdk.createClient(server)
+    this.client = sdk.createClient({
+      baseUrl: server,
+      unstableClientRelationAggregation: true,
+    })
     try {
       const res = await this.client.login('m.login.password', {
         user,
@@ -35,6 +38,7 @@ export default class MatrixClient {
       baseUrl: `https://${session.home_server}`,
       accessToken: session.access_token,
       userId: session.user_id,
+      unstableClientRelationAggregation: true,
     })
     this.start()
   }
