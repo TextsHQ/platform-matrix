@@ -4,6 +4,7 @@ import {
   PlatformInfo,
 } from '@textshq/platform-sdk'
 
+import { supportedReactions } from './constants'
 import { mapMessage } from './mappers'
 import { AuthForm } from './AuthForm'
 
@@ -19,7 +20,8 @@ const info: PlatformInfo = {
   loginMode: 'custom',
   auth: AuthForm,
   reactions: {
-    supported: {},
+    supported: supportedReactions,
+    canReactWithAllEmojis: true,
   },
   deletionMode: MessageDeletionMode.DELETE_FOR_EVERYONE,
   typingDurationMs: 3000,

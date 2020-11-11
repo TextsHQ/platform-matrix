@@ -194,6 +194,21 @@ export function mapMessage(
       }
       break
     }
+    case 'm.reaction': {
+      const related = event.getContent()['m.relates_to']
+      const origEvent = room.findEventById(related.event_id)
+      if (!origEvent) {
+        return
+      }
+      const message = mapMessage(matrixClient, userID, room, origEvent)
+      message.reactions.push({
+        id: event.getId(),
+        reactionKey: related.key,
+        participantID: senderID,
+        emoji: true,
+      })
+      return message
+    }
     case 'm.room.redaction': {
       // The change has already been rendered in the redacted event.
       return
