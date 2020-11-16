@@ -89,6 +89,7 @@ export function mapMessage(
   event,
   fresh = false
 ): Message {
+  console.log('-- mapMessage', event)
   let text
   let action = null
   let attachments = []
@@ -141,6 +142,7 @@ export function mapMessage(
           }
         })
       }
+      console.log('-- isRedacted', event.isRedacted())
       if (event.isRedacted()) {
         const byEvent = room.findEventById(event.getUnsigned().redacted_by)
         if (!byEvent) {
@@ -210,8 +212,8 @@ export function mapMessage(
       break
     }
     case 'm.reaction': {
-      // Handled by getRelationsForEvent in m.room.message.
       if (!fresh) {
+        // Handled by getRelationsForEvent in m.room.message.
         return
       }
       const related = event.getContent()['m.relates_to']
@@ -226,11 +228,33 @@ export function mapMessage(
       return message
     }
     case 'm.room.redaction': {
-      // Handled by event.isRedacted in m.room.message
+      if (!fresh) {
+        // Handled by event.isRedacted in m.room.message
+        return
+      }
+      const redacted = room.findEventById(event.getAssociatedId())
+      console.log('** redacted', redacted, event.getAssociatedId())
+      if (redacted) {
+        if (redacted.getType() === 'm.reaction') {
+          const related = redacted.getContent()['m.relates_to']
+          console.log('** related', related)
+          if (!related) {
+            return
+          }
+          const origEvent = room.findEventById(related.event_id)
+          if (!origEvent) {
+            return
+          }
+          const message = mapMessage(matrixClient, userID, room, origEvent)
+          return message
+        } else if (redacted.getType() === 'm.room.message') {
+          return mapMessage(matrixClient, userID, room, redacted)
+        }
+      }
       return
     }
     default: {
-      console.log('-- mapMessage', event)
+      // console.log('-- mapMessage', event)
       return
     }
   }
