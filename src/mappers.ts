@@ -89,7 +89,7 @@ export function mapMessage(
   event,
   fresh = false
 ): Message {
-  console.log('-- mapMessage', event)
+  console.log('-- mapMessage', event.event, event.status)
   let text
   let action = null
   let attachments = []
@@ -142,14 +142,13 @@ export function mapMessage(
           }
         })
       }
-      console.log('-- isRedacted', event.isRedacted())
       if (event.isRedacted()) {
-        const byEvent = room.findEventById(event.getUnsigned().redacted_by)
-        if (!byEvent) {
+        const redactedBy = event.getUnsigned().redacted_because.sender
+        if (!redactedBy) {
           return
         }
         isDeleted = true
-        text = `Message deleted by ${byEvent.getSender()}`
+        text = `Message deleted by ${redactedBy}`
         break
       }
       const content = event.getContent()
@@ -216,7 +215,7 @@ export function mapMessage(
         // Handled by getRelationsForEvent in m.room.message.
         return
       }
-      const related = event.getContent()['m.relates_to']
+      const related = event.getRelation()
       if (!related) {
         return
       }
