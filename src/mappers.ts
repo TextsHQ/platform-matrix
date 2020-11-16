@@ -86,7 +86,8 @@ export function mapMessage(
   matrixClient: MatrixClient,
   userID,
   room,
-  event
+  event,
+  fresh = false
 ): Message {
   let text
   let action = null
@@ -210,19 +211,18 @@ export function mapMessage(
     }
     case 'm.reaction': {
       // Handled by getRelationsForEvent in m.room.message.
-      return
+      if (!fresh) {
+        return
+      }
       const related = event.getContent()['m.relates_to']
+      if (!related) {
+        return
+      }
       const origEvent = room.findEventById(related.event_id)
       if (!origEvent) {
         return
       }
       const message = mapMessage(matrixClient, userID, room, origEvent)
-      message.reactions.push({
-        id: event.getId(),
-        reactionKey: related.key,
-        participantID: senderID,
-        emoji: true,
-      })
       return message
     }
     case 'm.room.redaction': {

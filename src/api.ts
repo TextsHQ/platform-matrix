@@ -28,6 +28,7 @@ export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
   session
   threads = {}
+  rooms = {}
 
   get userID() {
     return this.session?.user_id
@@ -69,6 +70,7 @@ export default class Matrix implements PlatformAPI {
       case 'Room': {
         const data = mapRoom(this.matrixClient, this.userID, payload)
         this.threads[data.id] = data
+        this.rooms[data.id] = payload
         return {
           type: ServerEventType.STATE_SYNC,
           objectID: [data.id],
@@ -82,7 +84,8 @@ export default class Matrix implements PlatformAPI {
           this.matrixClient,
           this.userID,
           payload.room,
-          payload.event
+          payload.event,
+          true
         )
         if (!data) return
         return {
@@ -128,6 +131,13 @@ export default class Matrix implements PlatformAPI {
     threadID: string,
     pagination: PaginationArg
   ): Promise<Paginated<Message>> => {
+    let items = []
+    // let room = this.rooms[threadID]
+    // if (room) {
+    //   items = room.timeline
+    //     .map(event => mapMessage(this.matrixClient, this.userID, room, event))
+    //     .filter(Boolean)
+    // }
     return {
       items: [],
       hasMore: false,
