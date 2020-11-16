@@ -62,6 +62,12 @@ export default class MatrixClient {
     this.client.on('Room.timeline', (event, room, toStartOfTimeline) => {
       this.onMessage('Room.timeline', { room, event })
     })
+    this.client.on(
+      'Room.localEchoUpdated',
+      (event, room, oldEventId, oldStatus) => {
+        this.onMessage('Room.localEchoUpdated', { room, event, oldEventId })
+      }
+    )
   }
 
   sendMessage(...args) {
