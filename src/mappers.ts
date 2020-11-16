@@ -245,6 +245,7 @@ export function mapMessage(
             return
           }
           const message = mapMessage(matrixClient, userID, room, origEvent)
+          message.reactions.filter(x => x.id != event.getAssociatedId())
           return message
         } else if (redacted.getType() === 'm.room.message') {
           return mapMessage(matrixClient, userID, room, redacted)

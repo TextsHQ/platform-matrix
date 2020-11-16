@@ -82,6 +82,14 @@ export default class Matrix implements PlatformAPI {
         ]
       }
       case 'Room.timeline': {
+        if (payload.event.getType() === 'm.room.redaction') {
+          return [
+            {
+              type: ServerEventType.THREAD_MESSAGES_REFRESH,
+              threadID: payload.room.roomId,
+            },
+          ]
+        }
         const data = mapMessage(
           this.matrixClient,
           this.userID,
@@ -161,14 +169,14 @@ export default class Matrix implements PlatformAPI {
     pagination: PaginationArg
   ): Promise<Paginated<Message>> => {
     let items = []
-    // let room = this.rooms[threadID]
-    // if (room) {
-    //   items = room.timeline
-    //     .map(event => mapMessage(this.matrixClient, this.userID, room, event))
-    //     .filter(Boolean)
-    // }
+    let room = this.rooms[threadID]
+    if (room) {
+      items = room.timeline
+        .map(event => mapMessage(this.matrixClient, this.userID, room, event))
+        .filter(Boolean)
+    }
     return {
-      items: [],
+      items,
       hasMore: false,
     }
   }
