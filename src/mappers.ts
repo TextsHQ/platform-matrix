@@ -89,7 +89,6 @@ export function mapMessage(
   event,
   fresh = false
 ): Message {
-  console.log('-- mapMessage', event.event, event.status)
   let text
   let action = null
   let attachments = []
@@ -129,6 +128,15 @@ export function mapMessage(
       break
     }
     case 'm.room.message': {
+      if (event.isRedacted()) {
+        const redactedBy = event.getUnsigned().redacted_because.sender
+        if (!redactedBy) {
+          return
+        }
+        isDeleted = true
+        text = `Message deleted by ${redactedBy}`
+        break
+      }
       const annotationRelations = room
         .getUnfilteredTimelineSet()
         .getRelationsForEvent(event.getId(), 'm.annotation', 'm.reaction')
@@ -141,15 +149,6 @@ export function mapMessage(
             emoji: true,
           }
         })
-      }
-      if (event.isRedacted()) {
-        const redactedBy = event.getUnsigned().redacted_because.sender
-        if (!redactedBy) {
-          return
-        }
-        isDeleted = true
-        text = `Message deleted by ${redactedBy}`
-        break
       }
       const content = event.getContent()
       switch (content.msgtype) {
@@ -254,7 +253,7 @@ export function mapMessage(
       return
     }
     default: {
-      // console.log('-- mapMessage', event)
+      console.log('-- mapMessage', event)
       return
     }
   }
