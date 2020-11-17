@@ -86,11 +86,13 @@ export function mapMessage(
   matrixClient: MatrixClient,
   userID,
   room,
-  event
+  event,
+  fresh = false
 ): Message {
   let text
   let action = null
   let attachments = []
+  let reactions = []
   let isDeleted = false
   let linkedMessageID
   const senderID = event.getSender()
@@ -127,13 +129,26 @@ export function mapMessage(
     }
     case 'm.room.message': {
       if (event.isRedacted()) {
-        const byEvent = room.findEventById(event.getUnsigned().redacted_by)
-        if (!byEvent) {
+        const redactedBy = event.getUnsigned().redacted_because.sender
+        if (!redactedBy) {
           return
         }
         isDeleted = true
-        text = `Message deleted by ${byEvent.getSender()}`
+        text = `Message deleted by ${redactedBy}`
         break
+      }
+      const annotationRelations = room
+        .getUnfilteredTimelineSet()
+        .getRelationsForEvent(event.getId(), 'm.annotation', 'm.reaction')
+      if (annotationRelations) {
+        reactions = annotationRelations.getRelations().map(event => {
+          return {
+            id: event.getId(),
+            reactionKey: event.getRelation().key,
+            participantID: event.getSender(),
+            emoji: true,
+          }
+        })
       }
       const content = event.getContent()
       switch (content.msgtype) {
@@ -194,8 +209,47 @@ export function mapMessage(
       }
       break
     }
+    case 'm.reaction': {
+      if (!fresh) {
+        // Handled by getRelationsForEvent in m.room.message.
+        return
+      }
+      const related = event.getRelation()
+      if (!related) {
+        return
+      }
+      const origEvent = room.findEventById(related.event_id)
+      if (!origEvent) {
+        return
+      }
+      const message = mapMessage(matrixClient, userID, room, origEvent)
+      return message
+    }
     case 'm.room.redaction': {
-      // The change has already been rendered in the redacted event.
+      if (!fresh) {
+        // Handled by event.isRedacted in m.room.message
+        return
+      }
+      const redacted = room.findEventById(event.getAssociatedId())
+      console.log('** redacted', redacted, event.getAssociatedId())
+      if (redacted) {
+        if (redacted.getType() === 'm.reaction') {
+          const related = redacted.getContent()['m.relates_to']
+          console.log('** related', related)
+          if (!related) {
+            return
+          }
+          const origEvent = room.findEventById(related.event_id)
+          if (!origEvent) {
+            return
+          }
+          const message = mapMessage(matrixClient, userID, room, origEvent)
+          message.reactions.filter(x => x.id != event.getAssociatedId())
+          return message
+        } else if (redacted.getType() === 'm.room.message') {
+          return mapMessage(matrixClient, userID, room, redacted)
+        }
+      }
       return
     }
     default: {
@@ -215,7 +269,7 @@ export function mapMessage(
     isAction: !!action,
     action,
     isDeleted,
-    reactions: [],
+    reactions,
     linkedMessageID,
   }
 }

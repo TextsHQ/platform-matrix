@@ -28,6 +28,7 @@ export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
   session
   threads = {}
+  rooms = {}
 
   get userID() {
     return this.session?.user_id
@@ -63,35 +64,74 @@ export default class Matrix implements PlatformAPI {
     displayText: this.session.user_id,
   })
 
-  mapEvent = async (type, payload): Promise<ServerEvent> => {
+  mapEvents = async (type, payload): Promise<ServerEvent[]> => {
     console.log('-- mapEvent', type, payload)
     switch (type) {
       case 'Room': {
         const data = mapRoom(this.matrixClient, this.userID, payload)
         this.threads[data.id] = data
-        return {
-          type: ServerEventType.STATE_SYNC,
-          objectID: [data.id],
-          mutationType: 'created',
-          objectName: 'thread',
-          data,
-        }
+        this.rooms[data.id] = payload
+        return [
+          {
+            type: ServerEventType.STATE_SYNC,
+            objectID: [data.id],
+            mutationType: 'created',
+            objectName: 'thread',
+            data,
+          },
+        ]
       }
       case 'Room.timeline': {
+        if (payload.event.getType() === 'm.room.redaction') {
+          return [
+            {
+              type: ServerEventType.THREAD_MESSAGES_REFRESH,
+              threadID: payload.room.roomId,
+            },
+          ]
+        }
         const data = mapMessage(
           this.matrixClient,
           this.userID,
           payload.room,
-          payload.event
+          payload.event,
+          true
         )
         if (!data) return
-        return {
-          type: ServerEventType.STATE_SYNC,
-          objectID: [payload.room.roomId, data.id],
-          mutationType: 'created',
-          objectName: 'message',
-          data,
-        }
+        return [
+          {
+            type: ServerEventType.STATE_SYNC,
+            objectID: [payload.room.roomId, data.id],
+            mutationType: 'created',
+            objectName: 'message',
+            data,
+          },
+        ]
+      }
+      case 'Room.localEchoUpdated': {
+        const data = mapMessage(
+          this.matrixClient,
+          this.userID,
+          payload.room,
+          payload.event,
+          true
+        )
+        if (!data) return
+        return [
+          {
+            type: ServerEventType.STATE_SYNC,
+            objectID: [payload.room.roomId, payload.oldEventId],
+            mutationType: 'deleted',
+            objectName: 'message',
+          },
+          {
+            type: ServerEventType.STATE_SYNC,
+            objectID: [payload.room.roomId, data.id],
+            mutationType: 'created',
+            objectName: 'message',
+            data,
+          },
+        ]
       }
     }
   }
@@ -99,9 +139,9 @@ export default class Matrix implements PlatformAPI {
   subscribeToEvents = (onEvent: OnServerEventCallback) => {
     // this.onEvent = onEvent
     this.matrixClient.onMessage = async (type, data) => {
-      const event = await this.mapEvent(type, data)
-      if (event) {
-        onEvent([event])
+      const events = await this.mapEvents(type, data)
+      if (events) {
+        onEvent(events)
       }
     }
   }
@@ -128,8 +168,15 @@ export default class Matrix implements PlatformAPI {
     threadID: string,
     pagination: PaginationArg
   ): Promise<Paginated<Message>> => {
+    let items = []
+    let room = this.rooms[threadID]
+    if (room) {
+      items = room.timeline
+        .map(event => mapMessage(this.matrixClient, this.userID, room, event))
+        .filter(Boolean)
+    }
     return {
-      items: [],
+      items,
       hasMore: false,
     }
   }
@@ -180,7 +227,7 @@ export default class Matrix implements PlatformAPI {
         },
       }
     }
-    this.matrixClient.sendMessage(threadID, msgContent)
+    await this.matrixClient.sendMessage(threadID, msgContent)
     return true
   }
 

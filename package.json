@@ -17,7 +17,8 @@
     "bluebird": "^3.7.2",
     "image-size": "^0.9.3",
     "lodash": "^4.17.19",
-    "matrix-js-sdk": "^9.0.1"
+    "matrix-js-sdk": "^9.0.1",
+    "react": "^16.14.0"
   },
   "peerDependencies": {
     "@textshq/platform-sdk": "link:../platform-sdk"
