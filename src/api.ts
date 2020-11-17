@@ -293,5 +293,7 @@ export default class Matrix implements PlatformAPI {
 
   sendReadReceipt = async (threadID: string, messageID: string) => {}
 
-  sendTypingIndicator = async (threadID: string, typing: boolean) => {}
+  sendTypingIndicator = async (threadID: string, typing: boolean) => {
+    this.matrixClient.sendTyping(threadID, typing)
+  }
 }

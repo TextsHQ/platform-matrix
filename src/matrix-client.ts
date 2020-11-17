@@ -78,8 +78,8 @@ export default class MatrixClient {
     this.client.sendMessage(...args)
   }
 
-  sendTextMessage(roomId, text) {
-    this.client.sendTextMessage(roomId, text)
+  sendTyping(roomId, typing) {
+    this.client.sendTyping(roomId, typing, 3000)
   }
 
   mxcUrlToHttp(...args) {
