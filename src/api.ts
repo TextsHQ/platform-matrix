@@ -243,7 +243,16 @@ export default class Matrix implements PlatformAPI {
     threadID: string,
     messageID: string,
     reactionName: string
-  ) => {}
+  ) => {
+    const msgContent = {
+      'm.relates_to': {
+        event_id: messageID,
+        key: reactionName,
+        rel_type: 'm.annotation',
+      },
+    }
+    await this.matrixClient.sendEvent(threadID, 'm.reaction', msgContent)
+  }
 
   removeReaction = async (
     threadID: string,

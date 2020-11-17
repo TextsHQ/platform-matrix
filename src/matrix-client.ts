@@ -70,6 +70,10 @@ export default class MatrixClient {
     )
   }
 
+  sendEvent(...args) {
+    this.client.sendEvent(...args)
+  }
+
   sendMessage(...args) {
     this.client.sendMessage(...args)
   }
