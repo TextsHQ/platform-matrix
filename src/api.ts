@@ -109,6 +109,14 @@ export default class Matrix implements PlatformAPI {
         ]
       }
       case 'Room.localEchoUpdated': {
+        if (payload.event.getType() === 'm.room.redaction') {
+          return [
+            {
+              type: ServerEventType.THREAD_MESSAGES_REFRESH,
+              threadID: payload.room.roomId,
+            },
+          ]
+        }
         const data = mapMessage(
           this.matrixClient,
           this.userID,
@@ -258,7 +266,25 @@ export default class Matrix implements PlatformAPI {
     threadID: string,
     messageID: string,
     reactionName: string
-  ) => {}
+  ) => {
+    const room = this.rooms[threadID]
+    if (!room) {
+      return
+    }
+    const annotationRelations = room
+      .getUnfilteredTimelineSet()
+      .getRelationsForEvent(messageID, 'm.annotation', 'm.reaction')
+    const reaction = annotationRelations.getRelations().find(event => {
+      return (
+        event.getSender() === this.userID &&
+        event.getRelation().key === reactionName
+      )
+    })
+    if (!reaction) {
+      return
+    }
+    await this.matrixClient.redactEvent(threadID, reaction.getId())
+  }
 
   deleteMessage = async (threadID: string, messageID: string) => {
     await this.matrixClient.redactEvent(threadID, messageID)
