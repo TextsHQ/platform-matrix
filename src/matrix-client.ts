@@ -68,6 +68,9 @@ export default class MatrixClient {
         this.onMessage('Room.localEchoUpdated', { room, event, oldEventId })
       }
     )
+    this.client.on('RoomMember.typing', (event, member) => {
+      this.onMessage('RoomMember.typing', { event, member })
+    })
   }
 
   sendEvent(...args) {

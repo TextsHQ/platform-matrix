@@ -141,6 +141,17 @@ export default class Matrix implements PlatformAPI {
           },
         ]
       }
+      case 'RoomMember.typing': {
+        return [
+          {
+            type: ServerEventType.PARTICIPANT_TYPING,
+            typing: payload.member.typing,
+            threadID: payload.member.roomId,
+            participantID: payload.member.userId,
+            durationMs: 3000,
+          },
+        ]
+      }
     }
   }
 
