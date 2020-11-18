@@ -18,7 +18,10 @@ import {
 import MatrixClient from './matrix-client'
 
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
-  let participantItems = []
+  const participantItems = room.currentState.getMembers().map(member => ({
+    id: member.userId,
+    username: member.name,
+  }))
   const messages = room.timeline
     .map(event => mapMessage(matrixClient, userID, room, event))
     .filter(Boolean)
