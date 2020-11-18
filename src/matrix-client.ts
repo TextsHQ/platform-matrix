@@ -1,11 +1,18 @@
+// @ts-ignore
+global.Olm = require('olm')
 import sdk from 'matrix-js-sdk'
+import { WebStorageSessionStore } from 'matrix-js-sdk/lib/store/session/webstorage'
+import { LocalStorage } from 'node-localstorage'
 
 import { LoginCreds } from '@textshq/platform-sdk'
+
+const localStorage = new LocalStorage('./matrix-storage')
 
 export type MatrixSession = {
   user_id: string
   access_token: string
   home_server: string
+  device_id: string
   well_known: {
     'm.homeserver': {
       base_url: string
@@ -21,6 +28,7 @@ export default class MatrixClient {
     this.client = sdk.createClient({
       baseUrl: server,
       unstableClientRelationAggregation: true,
+      sessionStore: new WebStorageSessionStore(window.localStorage),
     })
     try {
       const res = await this.client.login('m.login.password', {
@@ -38,12 +46,15 @@ export default class MatrixClient {
       baseUrl: `https://${session.home_server}`,
       accessToken: session.access_token,
       userId: session.user_id,
+      deviceId: session.device_id,
       unstableClientRelationAggregation: true,
+      sessionStore: new WebStorageSessionStore(localStorage),
     })
     this.start()
   }
 
   start() {
+    this.client.initCrypto()
     this.client.startClient()
     this.client.once('sync', (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
