@@ -150,6 +150,9 @@ export default class Matrix implements PlatformAPI {
         ]
       }
       case 'RoomMember.typing': {
+        if (payload.member.userId === this.userID) {
+          return
+        }
         return [
           {
             type: ServerEventType.PARTICIPANT_TYPING,
@@ -164,7 +167,6 @@ export default class Matrix implements PlatformAPI {
   }
 
   subscribeToEvents = (onEvent: OnServerEventCallback) => {
-    // this.onEvent = onEvent
     this.matrixClient.onMessage = async (type, data) => {
       const events = await this.mapEvents(type, data)
       if (events) {
