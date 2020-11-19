@@ -130,6 +130,7 @@ export function mapMessage(
       }
       break
     }
+    case 'm.room.encrypted':
     case 'm.room.message': {
       if (event.isRedacted()) {
         const redactedBy = event.getUnsigned().redacted_because.sender
@@ -157,6 +158,7 @@ export function mapMessage(
       switch (content.msgtype) {
         case 'm.bad.encrypted':
         case 'm.text': {
+          console.log('** content', content)
           text = content.body
           if (
             content['m.relates_to'] &&

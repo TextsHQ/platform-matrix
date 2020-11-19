@@ -15,7 +15,7 @@ function useInput(
   return [value, onChange, setValue]
 }
 
-export const AuthForm: React.FC<{
+const AuthForm: React.FC<{
   api: PlatformAPI
   login: (creds: LoginCreds) => void
 }> = ({ api, login }) => {
@@ -50,3 +50,5 @@ export const AuthForm: React.FC<{
     </form>
   )
 }
+
+export default AuthForm

@@ -37,7 +37,7 @@ export default class Matrix implements PlatformAPI {
   init = async (session: MatrixSession, accountInfo: AccountInfo) => {
     if (session?.access_token) {
       this.session = session
-      this.matrixClient.startFromSession(session)
+      return this.matrixClient.startFromSession(session)
     }
   }
 
@@ -47,7 +47,7 @@ export default class Matrix implements PlatformAPI {
     console.log('-- login', creds)
     const res = await this.matrixClient.login(creds)
     if (res.access_token) {
-      this.matrixClient.start()
+      await this.matrixClient.startFromSession(res)
       this.session = res
       return { type: 'success' }
     } else if (res.error) {
