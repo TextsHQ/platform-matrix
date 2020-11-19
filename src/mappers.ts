@@ -158,6 +158,7 @@ export function mapMessage(
       switch (content.msgtype) {
         case 'm.bad.encrypted':
         case 'm.text': {
+          console.log('** content', content)
           text = content.body
           if (
             content['m.relates_to'] &&
