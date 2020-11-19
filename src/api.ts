@@ -29,15 +29,20 @@ export default class Matrix implements PlatformAPI {
   session
   threads = {}
   rooms = {}
+  accountInfo: AccountInfo
 
   get userID() {
     return this.session?.user_id
   }
 
   init = async (session: MatrixSession, accountInfo: AccountInfo) => {
+    this.accountInfo = accountInfo
     if (session?.access_token) {
       this.session = session
-      return this.matrixClient.startFromSession(session)
+      return this.matrixClient.startFromSession(
+        session,
+        this.accountInfo.dataDirPath
+      )
     }
   }
 
@@ -47,7 +52,10 @@ export default class Matrix implements PlatformAPI {
     console.log('-- login', creds)
     const res = await this.matrixClient.login(creds)
     if (res.access_token) {
-      await this.matrixClient.startFromSession(res)
+      await this.matrixClient.startFromSession(
+        res,
+        this.accountInfo.dataDirPath
+      )
       this.session = res
       return { type: 'success' }
     } else if (res.error) {
