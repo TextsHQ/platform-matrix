@@ -6,7 +6,8 @@ import {
 
 import { supportedReactions } from './constants'
 import { mapMessage } from './mappers'
-import { AuthForm } from './AuthForm'
+
+const { React } = globalThis.texts
 
 const info: PlatformInfo = {
   name: 'matrix',
@@ -18,7 +19,7 @@ const info: PlatformInfo = {
 <path d="M506.3,508.1V11.9h-35.7V0H520v520h-49.4v-11.9H506.3z"/>
 </svg>`,
   loginMode: 'custom',
-  auth: AuthForm,
+  auth: React?.lazy(() => import('./AuthForm')),
   reactions: {
     supported: supportedReactions,
     canReactWithAllEmojis: true,

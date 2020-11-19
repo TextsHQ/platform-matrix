@@ -19,8 +19,7 @@
     "lodash": "^4.17.19",
     "matrix-js-sdk": "^9.0.1",
     "node-localstorage": "^2.1.6",
-    "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz",
-    "react": "^16.14.0"
+    "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz"
   },
   "peerDependencies": {
     "@textshq/platform-sdk": "link:../platform-sdk"
