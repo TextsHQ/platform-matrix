@@ -58,6 +58,9 @@ export default class MatrixClient {
       store: new MemoryStore({ localStorage: global.localStorage }),
     })
     await this.client.initCrypto()
+    // Support sending encrypted messages even if there are unverified members
+    // in a room.
+    this.client.setGlobalErrorOnUnknownDevices(false)
     this.client.startClient()
     this.client.once('sync', (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
