@@ -53,8 +53,8 @@ export default class MatrixClient {
     this.start()
   }
 
-  start() {
-    this.client.initCrypto()
+  async start() {
+    await this.client.initCrypto()
     this.client.startClient()
     this.client.once('sync', (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
