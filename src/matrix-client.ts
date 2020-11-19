@@ -8,8 +8,13 @@ import { LocalStorage } from 'node-localstorage'
 
 import { LoginCreds } from '@textshq/platform-sdk'
 
-const localStorage = new LocalStorage('./matrix-storage')
-sdk.setCryptoStoreFactory(() => new LocalStorageCryptoStore(localStorage))
+if (!global.localStorage) {
+  global.localStorage = new LocalStorage('./matrix-storage')
+}
+
+sdk.setCryptoStoreFactory(
+  () => new LocalStorageCryptoStore(global.localStorage)
+)
 
 export type MatrixSession = {
   user_id: string
@@ -30,9 +35,6 @@ export default class MatrixClient {
   async login({ custom: server, username: user, password }: LoginCreds) {
     this.client = sdk.createClient({
       baseUrl: server,
-      unstableClientRelationAggregation: true,
-      sessionStore: new WebStorageSessionStore(localStorage),
-      store: new MemoryStore({ localStorage }),
     })
     try {
       const res = await this.client.login('m.login.password', {
@@ -45,20 +47,16 @@ export default class MatrixClient {
     }
   }
 
-  startFromSession(session: MatrixSession) {
+  async startFromSession(session: MatrixSession) {
     this.client = sdk.createClient({
       baseUrl: `https://${session.home_server}`,
       accessToken: session.access_token,
       userId: session.user_id,
       deviceId: session.device_id,
       unstableClientRelationAggregation: true,
-      sessionStore: new WebStorageSessionStore(localStorage),
-      store: new MemoryStore({ localStorage }),
+      sessionStore: new WebStorageSessionStore(global.localStorage),
+      store: new MemoryStore({ localStorage: global.localStorage }),
     })
-    this.start()
-  }
-
-  async start() {
     await this.client.initCrypto()
     this.client.startClient()
     this.client.once('sync', (state, prevState, res) => {
