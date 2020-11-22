@@ -68,6 +68,10 @@ export default class MatrixClient {
     })
   }
 
+  stopClient(...args) {
+    this.client.stopClient(...args)
+  }
+
   onPrepared() {
     var rooms = this.client.getRooms()
     rooms.forEach(room => {

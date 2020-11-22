@@ -65,7 +65,9 @@ export default class Matrix implements PlatformAPI {
 
   logout = () => {}
 
-  dispose = () => {}
+  dispose = () => {
+    this.matrixClient.stopClient()
+  }
 
   getCurrentUser = (): CurrentUser => ({
     id: this.session.user_id,
