@@ -1,5 +1,4 @@
 // @ts-ignore
-global.Olm = require('olm')
 import sdk from 'matrix-js-sdk'
 import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localStorage-crypto-store'
 import { WebStorageSessionStore } from 'matrix-js-sdk/lib/store/session/webstorage'
@@ -7,6 +6,8 @@ import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
 import { LocalStorage } from 'node-localstorage'
 
 import { LoginCreds } from '@textshq/platform-sdk'
+
+global.Olm = require('olm')
 
 export type MatrixSession = {
   user_id: string
@@ -22,6 +23,7 @@ export type MatrixSession = {
 
 export default class MatrixClient {
   client
+
   onMessage: Function
 
   async login({ custom: server, username: user, password }: LoginCreds) {
@@ -62,14 +64,18 @@ export default class MatrixClient {
     this.client.once('sync', (state, prevState, res) => {
       // state will be 'PREPARED' when the client is ready to use
       console.log('sync', state)
-      if (state == 'PREPARED') {
+      if (state === 'PREPARED') {
         this.onPrepared()
       }
     })
   }
 
+  stopClient(...args) {
+    this.client.stopClient(...args)
+  }
+
   onPrepared() {
-    var rooms = this.client.getRooms()
+    const rooms = this.client.getRooms()
     rooms.forEach(room => {
       this.onMessage('Room', room)
     })
@@ -80,7 +86,7 @@ export default class MatrixClient {
       'Room.localEchoUpdated',
       (event, room, oldEventId, oldStatus) => {
         this.onMessage('Room.localEchoUpdated', { room, event, oldEventId })
-      }
+      },
     )
     this.client.on('RoomMember.typing', (event, member) => {
       this.onMessage('RoomMember.typing', { event, member })

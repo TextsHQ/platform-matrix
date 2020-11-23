@@ -1,11 +1,9 @@
 import { promises as fs } from 'fs'
-import path from 'path'
-import bluebird from 'bluebird'
 import sizeOf from 'image-size'
+import rimraf from 'rimraf'
 import {
   PlatformAPI,
   OnServerEventCallback,
-  Participant,
   LoginResult,
   Paginated,
   Thread,
@@ -17,7 +15,6 @@ import {
   ServerEventType,
   ServerEvent,
   PaginationArg,
-  texts,
   AccountInfo,
 } from '@textshq/platform-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
@@ -26,9 +23,13 @@ import { ContentInfo } from './types/matrix'
 
 export default class Matrix implements PlatformAPI {
   matrixClient = new MatrixClient()
+
   session
+
   threads = {}
+
   rooms = {}
+
   accountInfo: AccountInfo
 
   get userID() {
@@ -41,7 +42,7 @@ export default class Matrix implements PlatformAPI {
       this.session = session
       return this.matrixClient.startFromSession(
         session,
-        this.accountInfo.dataDirPath
+        this.accountInfo.dataDirPath,
       )
     }
   }
@@ -54,18 +55,28 @@ export default class Matrix implements PlatformAPI {
     if (res.access_token) {
       await this.matrixClient.startFromSession(
         res,
-        this.accountInfo.dataDirPath
+        this.accountInfo.dataDirPath,
       )
       this.session = res
       return { type: 'success' }
-    } else if (res.error) {
+    }
+    if (res.error) {
       return { type: 'error', errorMessage: res.error }
     }
   }
 
-  logout = () => {}
+  // @ts-ignore
+  logout = (accountInfo: AccountInfo) =>
+    new Promise(resolve => {
+      this.dispose()
+      rimraf(accountInfo.dataDirPath, () => {
+        resolve()
+      })
+    })
 
-  dispose = () => {}
+  dispose = () => {
+    this.matrixClient.stopClient()
+  }
 
   getCurrentUser = (): CurrentUser => ({
     id: this.session.user_id,
@@ -103,7 +114,7 @@ export default class Matrix implements PlatformAPI {
           this.userID,
           payload.room,
           payload.event,
-          true
+          true,
         )
         if (!data) return
         return [
@@ -130,7 +141,7 @@ export default class Matrix implements PlatformAPI {
           this.userID,
           payload.room,
           payload.event,
-          true
+          true,
         )
         if (!data) return
         return [
@@ -177,28 +188,24 @@ export default class Matrix implements PlatformAPI {
 
   unsubscribeToEvents = () => {}
 
-  serializeSession = () => {
-    return this.session
-  }
+  serializeSession = () => this.session
 
   searchUsers = async (typed: string) => []
 
   createThread = (userIDs: string[]) => null
 
-  getThreads = async (inboxName: InboxName): Promise<Paginated<Thread>> => {
-    return {
-      items: Object.values(this.threads),
-      hasMore: false,
-      oldestCursor: null,
-    }
-  }
+  getThreads = async (inboxName: InboxName): Promise<Paginated<Thread>> => ({
+    items: Object.values(this.threads),
+    hasMore: false,
+    oldestCursor: null,
+  })
 
   getMessages = async (
     threadID: string,
-    pagination: PaginationArg
+    pagination: PaginationArg,
   ): Promise<Paginated<Message>> => {
     let items = []
-    let room = this.rooms[threadID]
+    const room = this.rooms[threadID]
     if (room) {
       items = room.timeline
         .map(event => mapMessage(this.matrixClient, this.userID, room, event))
@@ -213,7 +220,7 @@ export default class Matrix implements PlatformAPI {
   sendMessage = async (
     threadID: string,
     content: MessageContent,
-    options: MessageSendOptions
+    options: MessageSendOptions,
   ) => {
     let msgContent
     let attachmentBuffer
@@ -229,7 +236,7 @@ export default class Matrix implements PlatformAPI {
         mimetype: content.mimeType,
         size: attachmentBuffer.byteLength,
       }
-      if (msgtype == 'm.image') {
+      if (msgtype === 'm.image') {
         const dimension = sizeOf(attachmentBuffer)
         if (dimension) {
           // height/width are required to preview in Element.
@@ -265,13 +272,13 @@ export default class Matrix implements PlatformAPI {
   sendFileFromBuffer = async (
     threadID: string,
     fileBuffer: Buffer,
-    mimeType: string
+    mimeType: string,
   ) => true
 
   addReaction = async (
     threadID: string,
     messageID: string,
-    reactionName: string
+    reactionName: string,
   ) => {
     const msgContent = {
       'm.relates_to': {
@@ -286,7 +293,7 @@ export default class Matrix implements PlatformAPI {
   removeReaction = async (
     threadID: string,
     messageID: string,
-    reactionName: string
+    reactionName: string,
   ) => {
     const room = this.rooms[threadID]
     if (!room) {
@@ -295,12 +302,13 @@ export default class Matrix implements PlatformAPI {
     const annotationRelations = room
       .getUnfilteredTimelineSet()
       .getRelationsForEvent(messageID, 'm.annotation', 'm.reaction')
-    const reaction = annotationRelations.getRelations().find(event => {
-      return (
-        event.getSender() === this.userID &&
-        event.getRelation().key === reactionName
+    const reaction = annotationRelations
+      .getRelations()
+      .find(
+        event =>
+          event.getSender() === this.userID
+          && event.getRelation().key === reactionName,
       )
-    })
     if (!reaction) {
       return
     }
