@@ -1,19 +1,8 @@
-import Path from 'path'
-import { orderBy } from 'lodash'
 import {
   Message,
   Thread,
-  MessageReaction,
-  MessageSeen,
-  ServerEvent,
-  Participant,
   MessageActionType,
   MessageAttachmentType,
-  ServerEventType,
-  MessageAttachment,
-  ParticipantTypingEvent,
-  StateSyncEvent,
-  UNKNOWN_DATE,
 } from '@textshq/platform-sdk'
 import MatrixClient from './matrix-client'
 
@@ -45,15 +34,12 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   }
 }
 
-const getAttachmentTypeFromContentType = type => {
-  return (
-    {
-      'm.image': MessageAttachmentType.IMG,
-      'm.audio': MessageAttachmentType.AUDIO,
-      'm.video': MessageAttachmentType.VIDEO,
-    }[type] || MessageAttachmentType.UNKNOWN
-  )
-}
+const getAttachmentTypeFromContentType = type =>
+  ({
+    'm.image': MessageAttachmentType.IMG,
+    'm.audio': MessageAttachmentType.AUDIO,
+    'm.video': MessageAttachmentType.VIDEO,
+  }[type] || MessageAttachmentType.UNKNOWN)
 
 export const getContentTypeFromMimeType = mimeType => {
   const mainType = mimeType.split('/')[0]
@@ -74,11 +60,12 @@ export const getContentTypeFromMimeType = mimeType => {
 const stripQuotedMessage = body => {
   if (body.startsWith('\n')) {
     return body.slice(1)
-  } else if (!body.startsWith('> ')) {
+  }
+  if (!body.startsWith('> ')) {
     return body
   }
 
-  let linebreak = body.indexOf('\n')
+  const linebreak = body.indexOf('\n')
   if (linebreak !== -1) {
     return stripQuotedMessage(body.slice(linebreak + 1))
   }
@@ -90,7 +77,7 @@ export function mapMessage(
   userID,
   room,
   event,
-  fresh = false
+  fresh = false,
 ): Message {
   let text
   let action = null
@@ -111,12 +98,12 @@ export function mapMessage(
       break
     }
     case 'm.room.member': {
-      let membership = event.getContent().membership
+      const { membership } = event.getContent()
       let type
-      if (membership == 'join') {
+      if (membership === 'join') {
         type = MessageActionType.THREAD_PARTICIPANTS_ADDED
         text = `${senderID} joined the room`
-      } else if (membership == 'leave') {
+      } else if (membership === 'leave') {
         type = MessageActionType.THREAD_PARTICIPANTS_REMOVED
         text = `${senderID} left the room`
       } else {
@@ -145,14 +132,12 @@ export function mapMessage(
         .getUnfilteredTimelineSet()
         .getRelationsForEvent(event.getId(), 'm.annotation', 'm.reaction')
       if (annotationRelations) {
-        reactions = annotationRelations.getRelations().map(event => {
-          return {
-            id: event.getId(),
-            reactionKey: event.getRelation().key,
-            participantID: event.getSender(),
-            emoji: true,
-          }
-        })
+        reactions = annotationRelations.getRelations().map(ev => ({
+          id: ev.getId(),
+          reactionKey: ev.getRelation().key,
+          participantID: ev.getSender(),
+          emoji: true,
+        }))
       }
       const content = event.getContent()
       switch (content.msgtype) {
@@ -160,8 +145,8 @@ export function mapMessage(
         case 'm.text': {
           text = content.body
           if (
-            content['m.relates_to'] &&
-            content['m.relates_to']['m.in_reply_to']
+            content['m.relates_to']
+            && content['m.relates_to']['m.in_reply_to']
           ) {
             text = stripQuotedMessage(content.body)
             linkedMessageID = content['m.relates_to']['m.in_reply_to'].event_id
@@ -178,7 +163,7 @@ export function mapMessage(
             {
               id: event.getId(),
               type: getAttachmentTypeFromContentType(content.msgtype),
-              isGif: content.info.mimetype == 'image/gif',
+              isGif: content.info.mimetype === 'image/gif',
               size: { width: content.info.w, height: content.info.h },
               srcURL,
               mimeType: content.info.mimeType,
@@ -248,9 +233,10 @@ export function mapMessage(
             return
           }
           const message = mapMessage(matrixClient, userID, room, origEvent)
-          message.reactions.filter(x => x.id != event.getAssociatedId())
+          message.reactions.filter(x => x.id !== event.getAssociatedId())
           return message
-        } else if (redacted.getType() === 'm.room.message') {
+        }
+        if (redacted.getType() === 'm.room.message') {
           return mapMessage(matrixClient, userID, room, redacted)
         }
       }
@@ -268,7 +254,7 @@ export function mapMessage(
     timestamp: event.getDate(),
     senderID,
     text,
-    isSender: userID == senderID,
+    isSender: userID === senderID,
     attachments,
     isAction: !!action,
     action,

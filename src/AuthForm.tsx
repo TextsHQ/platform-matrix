@@ -1,13 +1,13 @@
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, ChangeEvent } from 'react'
 import { PlatformAPI, LoginCreds } from '@textshq/platform-sdk'
 
 function useInput(
-  defaultValue = ''
+  defaultValue = '',
 ): [
-  string,
-  (e: ChangeEvent<HTMLInputElement>) => void,
-  React.Dispatch<React.SetStateAction<string>>
-] {
+    string,
+    (e: ChangeEvent<HTMLInputElement>) => void,
+    React.Dispatch<React.SetStateAction<string>>
+  ] {
   const [value, setValue] = useState(defaultValue)
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)
@@ -45,7 +45,7 @@ const AuthForm: React.FC<{
         <input type="password" onChange={onPasswordChange} value={password} />
       </label>
       <label>
-        <button type="submit">{loading ? '...' : `Login to Matrix`}</button>
+        <button type="submit">{loading ? '...' : 'Login to Matrix'}</button>
       </label>
     </form>
   )
