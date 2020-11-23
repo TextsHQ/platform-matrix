@@ -2,6 +2,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import bluebird from 'bluebird'
 import sizeOf from 'image-size'
+import rimraf from 'rimraf'
 import {
   PlatformAPI,
   OnServerEventCallback,
@@ -63,7 +64,15 @@ export default class Matrix implements PlatformAPI {
     }
   }
 
-  logout = () => {}
+  // @ts-ignore
+  logout = (accountInfo: AccountInfo) => {
+    return new Promise(resolve => {
+      this.dispose()
+      rimraf(accountInfo.dataDirPath, () => {
+        resolve()
+      })
+    })
+  }
 
   dispose = () => {
     this.matrixClient.stopClient()
