@@ -94,7 +94,7 @@ export default class Matrix implements PlatformAPI {
           {
             type: ServerEventType.STATE_SYNC,
             objectID: [data.id],
-            mutationType: 'created',
+            mutationType: 'upsert',
             objectName: 'thread',
             data,
           },
@@ -121,7 +121,7 @@ export default class Matrix implements PlatformAPI {
           {
             type: ServerEventType.STATE_SYNC,
             objectID: [payload.room.roomId, data.id],
-            mutationType: 'created',
+            mutationType: 'upsert',
             objectName: 'message',
             data,
           },
@@ -148,13 +148,13 @@ export default class Matrix implements PlatformAPI {
           {
             type: ServerEventType.STATE_SYNC,
             objectID: [payload.room.roomId, payload.oldEventId],
-            mutationType: 'deleted',
+            mutationType: 'delete',
             objectName: 'message',
           },
           {
             type: ServerEventType.STATE_SYNC,
             objectID: [payload.room.roomId, data.id],
-            mutationType: 'created',
+            mutationType: 'upsert',
             objectName: 'message',
             data,
           },
