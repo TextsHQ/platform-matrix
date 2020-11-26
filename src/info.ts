@@ -2,12 +2,13 @@ import {
   Attribute,
   MessageDeletionMode,
   PlatformInfo,
+  texts,
 } from '@textshq/platform-sdk'
 
 import { supportedReactions } from './constants'
 import { mapMessage } from './mappers'
 
-const { React } = globalThis.texts
+const { React } = texts
 
 const info: PlatformInfo = {
   name: 'matrix',

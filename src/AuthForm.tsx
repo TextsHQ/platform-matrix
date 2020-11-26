@@ -1,5 +1,8 @@
-import React, { useState, ChangeEvent } from 'react'
-import { PlatformAPI, LoginCreds } from '@textshq/platform-sdk'
+import { PlatformAPI, LoginCreds, texts } from '@textshq/platform-sdk'
+import type { ChangeEvent } from 'react'
+
+const { React } = texts
+const { useState } = React
 
 function useInput(
   defaultValue = '',

@@ -67,7 +67,7 @@ export default class Matrix implements PlatformAPI {
 
   // @ts-ignore
   logout = (accountInfo: AccountInfo) =>
-    new Promise(resolve => {
+    new Promise<void>(resolve => {
       this.dispose()
       rimraf(accountInfo.dataDirPath, () => {
         resolve()
