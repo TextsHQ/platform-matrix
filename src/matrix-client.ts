@@ -1,4 +1,7 @@
-// @ts-ignore
+/* eslint-disable import/first */
+// @ts-ignore: olm needs to be loaded before matrix-js-sdk
+global.Olm = require('olm')
+
 import sdk from 'matrix-js-sdk'
 import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localStorage-crypto-store'
 import { WebStorageSessionStore } from 'matrix-js-sdk/lib/store/session/webstorage'
@@ -6,8 +9,6 @@ import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
 import { LocalStorage } from 'node-localstorage'
 
 import { LoginCreds } from '@textshq/platform-sdk'
-
-global.Olm = require('olm')
 
 export type MatrixSession = {
   user_id: string
