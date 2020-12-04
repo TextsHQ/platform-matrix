@@ -249,7 +249,6 @@ export function mapMessage(
   }
 
   return {
-    _original: [],
     id: event.getId(),
     timestamp: event.getDate(),
     senderID,
