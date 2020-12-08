@@ -16,6 +16,7 @@ import {
   ServerEvent,
   PaginationArg,
   AccountInfo,
+  ActivityType,
 } from '@textshq/platform-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
 import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
@@ -87,16 +88,16 @@ export default class Matrix implements PlatformAPI {
     console.log('-- mapEvent', type, payload)
     switch (type) {
       case 'Room': {
-        const data = mapRoom(this.matrixClient, this.userID, payload)
-        this.threads[data.id] = data
-        this.rooms[data.id] = payload
+        const room = mapRoom(this.matrixClient, this.userID, payload)
+        this.threads[room.id] = room
+        this.rooms[room.id] = payload
         return [
           {
             type: ServerEventType.STATE_SYNC,
-            objectID: [data.id],
+            objectIDs: {},
             mutationType: 'upsert',
             objectName: 'thread',
-            data,
+            entries: [room],
           },
         ]
       }
@@ -109,21 +110,24 @@ export default class Matrix implements PlatformAPI {
             },
           ]
         }
-        const data = mapMessage(
+        const message = mapMessage(
           this.matrixClient,
           this.userID,
           payload.room,
           payload.event,
           true,
         )
-        if (!data) return
+        if (!message) return
         return [
           {
             type: ServerEventType.STATE_SYNC,
-            objectID: [payload.room.roomId, data.id],
+            objectIDs: {
+              threadID: payload.room.roomId,
+              messageID: message.id,
+            },
             mutationType: 'upsert',
             objectName: 'message',
-            data,
+            entries: [message],
           },
         ]
       }
@@ -147,16 +151,21 @@ export default class Matrix implements PlatformAPI {
         return [
           {
             type: ServerEventType.STATE_SYNC,
-            objectID: [payload.room.roomId, payload.oldEventId],
+            objectIDs: {
+              threadID: payload.room.roomId,
+            },
             mutationType: 'delete',
             objectName: 'message',
+            entries: [payload.oldEventId],
           },
           {
             type: ServerEventType.STATE_SYNC,
-            objectID: [payload.room.roomId, data.id],
+            objectIDs: {
+              threadID: payload.room.roomId,
+            },
             mutationType: 'upsert',
             objectName: 'message',
-            data,
+            entries: [data],
           },
         ]
       }
@@ -322,7 +331,8 @@ export default class Matrix implements PlatformAPI {
 
   sendReadReceipt = async (threadID: string, messageID: string) => {}
 
-  sendTypingIndicator = async (threadID: string, typing: boolean) => {
+  sendActivityIndicator = async (type: ActivityType, threadID: string) => {
+    const typing = type === ActivityType.TYPING
     this.matrixClient.sendTyping(threadID, typing)
   }
 }

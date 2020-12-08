@@ -9,7 +9,7 @@ function useInput(
 ): [
     string,
     (e: ChangeEvent<HTMLInputElement>) => void,
-    React.Dispatch<React.SetStateAction<string>>
+    React.Dispatch<React.SetStateAction<string>>,
   ] {
   const [value, setValue] = useState(defaultValue)
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
