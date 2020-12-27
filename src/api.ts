@@ -195,8 +195,6 @@ export default class Matrix implements PlatformAPI {
     }
   }
 
-  unsubscribeToEvents = () => {}
-
   serializeSession = () => this.session
 
   searchUsers = async (typed: string) => []
