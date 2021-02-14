@@ -1,4 +1,4 @@
-import { Message, Thread, MessageActionType, MessageAttachmentType } from '@textshq/platform-sdk'
+import { Message, Thread, MessageActionType, MessageAttachmentType, texts } from '@textshq/platform-sdk'
 import MatrixClient from './matrix-client'
 
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
@@ -79,7 +79,9 @@ export function mapMessage(
   let linkedMessageID
   const senderID = event.getSender()
 
-  switch (event.getType()) {
+  const eventType = event.getType()
+  texts.log(eventType, event)
+  switch (eventType) {
     case 'm.room.encryption': {
       action = {
         type: MessageActionType.THREAD_TITLE_UPDATED,
@@ -99,7 +101,6 @@ export function mapMessage(
         type = MessageActionType.THREAD_PARTICIPANTS_REMOVED
         text = `${senderID} left the room`
       } else {
-        console.log('m.room.member', event)
         return null
       }
       action = {
@@ -165,9 +166,6 @@ export function mapMessage(
           ]
           break
         }
-        default: {
-          console.log('m.room.message', event)
-        }
       }
       break
     }
@@ -212,11 +210,9 @@ export function mapMessage(
         return
       }
       const redacted = room.findEventById(event.getAssociatedId())
-      console.log('** redacted', redacted, event.getAssociatedId())
       if (redacted) {
         if (redacted.getType() === 'm.reaction') {
           const related = redacted.getContent()['m.relates_to']
-          console.log('** related', related)
           if (!related) {
             return
           }
@@ -232,10 +228,6 @@ export function mapMessage(
           return mapMessage(matrixClient, userID, room, redacted)
         }
       }
-      return
-    }
-    default: {
-      console.log('-- mapMessage', event)
       return
     }
   }

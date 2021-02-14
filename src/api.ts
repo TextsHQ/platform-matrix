@@ -49,7 +49,6 @@ export default class Matrix implements PlatformAPI {
   }
 
   login = async (creds): Promise<LoginResult> => {
-    console.log('-- login', creds)
     const res = await this.matrixClient.login(creds)
     if (res.access_token) {
       await this.matrixClient.startFromSession(
@@ -82,7 +81,6 @@ export default class Matrix implements PlatformAPI {
   })
 
   mapEvents = async (type, payload): Promise<ServerEvent[]> => {
-    console.log('-- mapEvent', type, payload)
     switch (type) {
       case 'Room': {
         const room = mapRoom(this.matrixClient, this.userID, payload)
