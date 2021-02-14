@@ -1,13 +1,10 @@
-/* eslint-disable import/first */
-// @ts-ignore: olm needs to be loaded before matrix-js-sdk
-global.Olm = require('olm')
-
+// global.Olm needs to be loaded before matrix-js-sdk
+import './patch-global-olm'
 import sdk from 'matrix-js-sdk'
 import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localStorage-crypto-store'
 import { WebStorageSessionStore } from 'matrix-js-sdk/lib/store/session/webstorage'
 import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
 import { LocalStorage } from 'node-localstorage'
-
 import { LoginCreds } from '@textshq/platform-sdk'
 
 export type MatrixSession = {
@@ -23,19 +20,14 @@ export type MatrixSession = {
 }
 
 export default class MatrixClient {
-  client
+  client: any
 
   onMessage: Function
 
   async login({ custom: server, username: user, password }: LoginCreds) {
-    this.client = sdk.createClient({
-      baseUrl: server,
-    })
+    this.client = sdk.createClient({ baseUrl: server })
     try {
-      const res = await this.client.login('m.login.password', {
-        user,
-        password,
-      })
+      const res = await this.client.login('m.login.password', { user, password })
       return res
     } catch (e) {
       return e.data
@@ -94,30 +86,10 @@ export default class MatrixClient {
     })
   }
 
-  sendEvent(...args) {
-    this.client.sendEvent(...args)
-  }
-
-  sendMessage(...args) {
-    this.client.sendMessage(...args)
-  }
-
-  sendTyping(roomId, typing) {
-    this.client.sendTyping(roomId, typing, 3000)
-  }
-
-  mxcUrlToHttp(...args) {
-    return this.client.mxcUrlToHttp(...args)
-  }
-
   upload(file) {
     return this.client._http.uploadContent(file, {
       rawResponse: false,
       onlyContentUri: true,
     })
-  }
-
-  redactEvent(...args) {
-    return this.client.redactEvent(...args)
   }
 }

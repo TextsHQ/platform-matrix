@@ -23,15 +23,15 @@ import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
 import { ContentInfo } from './types/matrix'
 
 export default class Matrix implements PlatformAPI {
-  matrixClient = new MatrixClient()
+  private readonly matrixClient = new MatrixClient()
 
-  session
+  private session: MatrixSession
 
-  threads = {}
+  private threads = {}
 
-  rooms = {}
+  private rooms = {}
 
-  accountInfo: AccountInfo
+  private accountInfo: AccountInfo
 
   get userID() {
     return this.session?.user_id
@@ -47,8 +47,6 @@ export default class Matrix implements PlatformAPI {
       )
     }
   }
-
-  getAuthUrl = async callback => {}
 
   login = async (creds): Promise<LoginResult> => {
     console.log('-- login', creds)
@@ -66,11 +64,10 @@ export default class Matrix implements PlatformAPI {
     }
   }
 
-  // @ts-ignore
-  logout = (accountInfo: AccountInfo) =>
+  logout = () =>
     new Promise<void>(resolve => {
       this.dispose()
-      rimraf(accountInfo.dataDirPath, () => {
+      rimraf(this.accountInfo?.dataDirPath, () => {
         resolve()
       })
     })
@@ -207,10 +204,7 @@ export default class Matrix implements PlatformAPI {
     oldestCursor: null,
   })
 
-  getMessages = async (
-    threadID: string,
-    pagination: PaginationArg,
-  ): Promise<Paginated<Message>> => {
+  getMessages = async (threadID: string, pagination: PaginationArg): Promise<Paginated<Message>> => {
     let items = []
     const room = this.rooms[threadID]
     if (room) {
@@ -224,13 +218,9 @@ export default class Matrix implements PlatformAPI {
     }
   }
 
-  sendMessage = async (
-    threadID: string,
-    content: MessageContent,
-    options: MessageSendOptions,
-  ) => {
-    let msgContent
-    let attachmentBuffer
+  sendMessage = async (threadID: string, content: MessageContent, options: MessageSendOptions) => {
+    let msgContent: any
+    let attachmentBuffer: Buffer
     if (content.filePath) {
       attachmentBuffer = await fs.readFile(content.filePath)
     } else if (content.fileBuffer) {
@@ -270,38 +260,23 @@ export default class Matrix implements PlatformAPI {
         },
       }
     }
-    await this.matrixClient.sendMessage(threadID, msgContent)
+    await this.matrixClient.client.sendMessage(threadID, msgContent)
     return true
   }
 
-  sendFileFromFilePath = async (threadID: string, filePath: string) => true
 
-  sendFileFromBuffer = async (
-    threadID: string,
-    fileBuffer: Buffer,
-    mimeType: string,
-  ) => true
-
-  addReaction = async (
-    threadID: string,
-    messageID: string,
-    reactionName: string,
-  ) => {
+  addReaction = async (threadID: string, messageID: string, reactionKey: string) => {
     const msgContent = {
       'm.relates_to': {
         event_id: messageID,
-        key: reactionName,
+        key: reactionKey,
         rel_type: 'm.annotation',
       },
     }
-    await this.matrixClient.sendEvent(threadID, 'm.reaction', msgContent)
+    await this.matrixClient.client.sendEvent(threadID, 'm.reaction', msgContent)
   }
 
-  removeReaction = async (
-    threadID: string,
-    messageID: string,
-    reactionName: string,
-  ) => {
+  removeReaction = async (threadID: string, messageID: string, reactionKey: string) => {
     const room = this.rooms[threadID]
     if (!room) {
       return
@@ -314,16 +289,16 @@ export default class Matrix implements PlatformAPI {
       .find(
         event =>
           event.getSender() === this.userID
-          && event.getRelation().key === reactionName,
+          && event.getRelation().key === reactionKey,
       )
     if (!reaction) {
       return
     }
-    await this.matrixClient.redactEvent(threadID, reaction.getId())
+    await this.matrixClient.client.redactEvent(threadID, reaction.getId())
   }
 
   deleteMessage = async (threadID: string, messageID: string) => {
-    await this.matrixClient.redactEvent(threadID, messageID)
+    await this.matrixClient.client.redactEvent(threadID, messageID)
     return true
   }
 
@@ -331,6 +306,6 @@ export default class Matrix implements PlatformAPI {
 
   sendActivityIndicator = async (type: ActivityType, threadID: string) => {
     const typing = type === ActivityType.TYPING
-    this.matrixClient.sendTyping(threadID, typing)
+    this.matrixClient.client.sendTyping(threadID, typing, 3000)
   }
 }

@@ -1,9 +1,4 @@
-import {
-  Message,
-  Thread,
-  MessageActionType,
-  MessageAttachmentType,
-} from '@textshq/platform-sdk'
+import { Message, Thread, MessageActionType, MessageAttachmentType } from '@textshq/platform-sdk'
 import MatrixClient from './matrix-client'
 
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
@@ -34,22 +29,19 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   }
 }
 
-const getAttachmentTypeFromContentType = type =>
-  ({
-    'm.image': MessageAttachmentType.IMG,
-    'm.audio': MessageAttachmentType.AUDIO,
-    'm.video': MessageAttachmentType.VIDEO,
-  }[type] || MessageAttachmentType.UNKNOWN)
+const getAttachmentTypeFromContentType = type => ({
+  'm.image': MessageAttachmentType.IMG,
+  'm.audio': MessageAttachmentType.AUDIO,
+  'm.video': MessageAttachmentType.VIDEO,
+}[type] || MessageAttachmentType.UNKNOWN)
 
-export const getContentTypeFromMimeType = mimeType => {
+export const getContentTypeFromMimeType = (mimeType: string) => {
   const mainType = mimeType.split('/')[0]
-  return (
-    {
-      image: 'm.image',
-      audio: 'm.audio',
-      video: 'm.video',
-    }[mainType] || 'm.file'
-  )
+  return {
+    image: 'm.image',
+    audio: 'm.audio',
+    video: 'm.video',
+  }[mainType] || 'm.file'
 }
 
 /**
@@ -158,7 +150,7 @@ export function mapMessage(
         case 'm.file':
         case 'm.image':
         case 'm.video': {
-          const srcURL = matrixClient.mxcUrlToHttp(content.url)
+          const srcURL = matrixClient.client.mxcUrlToHttp(content.url)
           attachments = [
             {
               id: event.getId(),
