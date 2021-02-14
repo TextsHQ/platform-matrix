@@ -233,6 +233,7 @@ export function mapMessage(
   }
 
   return {
+    _original: JSON.stringify(event),
     id: event.getId(),
     timestamp: event.getDate(),
     senderID,
