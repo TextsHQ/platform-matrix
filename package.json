@@ -19,6 +19,7 @@
     "lodash": "^4.17.20",
     "matrix-js-sdk": "^9.6.0",
     "node-localstorage": "^2.1.6",
+    "react": "https://github.com/TextsHQ/react-global-shim#3aa861a",
     "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz",
     "rimraf": "^3.0.2"
   },
