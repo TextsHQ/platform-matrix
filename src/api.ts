@@ -73,7 +73,7 @@ export default class Matrix implements PlatformAPI {
     })
 
   dispose = () => {
-    this.matrixClient.stopClient()
+    this.matrixClient.client?.stopClient()
   }
 
   getCurrentUser = (): CurrentUser => ({
