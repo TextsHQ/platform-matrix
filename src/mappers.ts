@@ -15,10 +15,10 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
     isUnread: false,
     isReadOnly: false,
     type: 'group',
-    timestamp: new Date(),
+    timestamp: messages.slice(-1)[0]?.timestamp || new Date(),
     messages: {
       items: messages,
-      hasMore: false,
+      hasMore: true,
       oldestCursor: null,
     },
     participants: {

@@ -18,6 +18,7 @@ import {
   AccountInfo,
   ActivityType,
 } from '@textshq/platform-sdk'
+import sdk from 'matrix-js-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
 import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
 import { ContentInfo } from './types/matrix'
@@ -203,16 +204,19 @@ export default class Matrix implements PlatformAPI {
   })
 
   getMessages = async (threadID: string, pagination: PaginationArg): Promise<Paginated<Message>> => {
-    let items = []
     const room = this.rooms[threadID]
-    if (room) {
-      items = room.timeline
-        .map(event => mapMessage(this.matrixClient, this.userID, room, event))
-        .filter(Boolean)
+    const liveTimeline = room.getLiveTimeline()
+    if (pagination?.direction === 'before') {
+      await this.matrixClient.client.scrollback(room, 30)
     }
+    // @ts-ignore
+    const hasMore = !!liveTimeline.getState(sdk.EventTimeline.BACKWARDS).paginationToken
+    const items = liveTimeline.getEvents()
+      .map(event => mapMessage(this.matrixClient, this.userID, room, event))
+      .filter(Boolean)
     return {
       items,
-      hasMore: false,
+      hasMore,
     }
   }
 
