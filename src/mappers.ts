@@ -1,14 +1,22 @@
 import { Message, Thread, MessageActionType, MessageAttachmentType, texts } from '@textshq/platform-sdk'
 import MatrixClient from './matrix-client'
 
+const stripAtMark = (name) => name.startsWith('@') ? name.slice(1) : name
+
+const AVATAR_WIDTH = 64
+const AVATAR_HEIGHT = 64
+
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
+  const baseUrl = matrixClient.client.getHomeserverUrl()
   const participantItems = room.currentState.getMembers().map(member => ({
     id: member.userId,
-    username: member.name,
+    username: stripAtMark(member.name),
+    imgURL: member.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'scale')
   }))
   const messages = room.timeline
     .map(event => mapMessage(matrixClient, userID, room, event))
     .filter(Boolean)
+  const imgURL = room.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'scale')
   return {
     id: room.roomId,
     title: room.name,
@@ -16,6 +24,7 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
     isReadOnly: false,
     type: 'group',
     timestamp: messages.slice(-1)[0]?.timestamp || new Date(),
+    imgURL,
     messages: {
       items: messages,
       hasMore: true,
