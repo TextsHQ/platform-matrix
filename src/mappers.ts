@@ -8,7 +8,7 @@ const AVATAR_HEIGHT = 64
 
 export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   const baseUrl = matrixClient.client.getHomeserverUrl()
-  const participantItems = room.currentState.getMembers().map(member => ({
+  const participantItems = room.currentState.getMembers().slice(0, 512).map(member => ({
     id: member.userId,
     username: stripAtMark(member.name),
     imgURL: member.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'scale')
