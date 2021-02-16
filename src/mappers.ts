@@ -144,6 +144,7 @@ export function mapMessage(
       const content = event.getContent()
       switch (content.msgtype) {
         case 'm.bad.encrypted':
+        case 'm.notice':
         case 'm.text': {
           text = content.body
           if (
