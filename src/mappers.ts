@@ -11,12 +11,12 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   const participantItems = room.currentState.getMembers().slice(0, 512).map(member => ({
     id: member.userId,
     username: stripAtMark(member.name),
-    imgURL: member.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'scale')
+    imgURL: member.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'crop')
   }))
   const messages = room.timeline
     .map(event => mapMessage(matrixClient, userID, room, event))
     .filter(Boolean)
-  const imgURL = room.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'scale')
+  const imgURL = room.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'crop')
   return {
     id: room.roomId,
     title: room.name,
