@@ -26,6 +26,25 @@ export function mapTextAttributes(src: string) {
           type: node.type,
           from: output.length,
         })
+      } else if (node.type === 'html_inline') {
+        if (node.literal.toLowerCase() === '<del>') {
+          tokenStack.push({
+            type: 'del',
+            from: output.length,
+          })
+        } else if (node.literal.toLowerCase() === '</del>') {
+          const lastToken = tokenStack.pop()
+          if (!lastToken) continue
+          if (lastToken.type !== 'del') {
+            tokenStack.push(lastToken)
+            continue
+          }
+          entities.push({
+            from: lastToken.from,
+            to: output.length,
+            strikethrough: true,
+          })
+        }
       } else if (['softbreak', 'linkebreak'].includes(node.type)) {
         output += '\n'
       } else if (node.type === 'text') {
