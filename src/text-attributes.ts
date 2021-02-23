@@ -20,6 +20,8 @@ export function mapTextAttributes(src: string) {
   let event
   while ((event = walker.next())) {
     const { node } = event
+    // Some node types have both entering (true) and entering (false), but
+    // others only have entering(true).
     if (event.entering) {
       if (TOKEN_TYPES.includes(node.type)) {
         tokenStack.push({
@@ -50,6 +52,15 @@ export function mapTextAttributes(src: string) {
           from: output.length,
           to: output.length + node.literal.length,
           code: true,
+        })
+        output += node.literal
+      } else if (node.type === 'code_block') {
+        entities.push({
+          from: output.length,
+          to: output.length + node.literal.length,
+          pre: true,
+          code: true,
+          codeLanguage: node.info,
         })
         output += node.literal
       } else if (['softbreak', 'linkebreak'].includes(node.type)) {

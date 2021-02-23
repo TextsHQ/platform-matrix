@@ -57,6 +57,24 @@ const cases = [
       },
     },
   },
+  {
+    text:
+    '```js\nconsole.log("matrix")\n```',
+    result: {
+      text: 'console.log("matrix")',
+      textAttributes: {
+        entities: [
+          {
+            from: 0,
+            to: 22,
+            pre: true,
+            code: true,
+            codeLanguage: 'js'
+          },
+        ],
+      },
+    },
+  },
 ]
 
 test('text attributes', () => {
