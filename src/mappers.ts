@@ -1,5 +1,6 @@
 import { Message, Thread, MessageActionType, MessageAttachmentType, texts } from '@textshq/platform-sdk'
 import MatrixClient from './matrix-client'
+import { mapTextAttributes } from './text-attributes'
 
 const stripAtMark = (name) => name.startsWith('@') ? name.slice(1) : name
 
@@ -80,24 +81,28 @@ export function mapMessage(
   event,
   fresh = false,
 ): Message {
-  let text
-  let action = null
-  let attachments = []
-  let reactions = []
-  let isDeleted = false
-  let linkedMessageID
   const senderID = event.getSender()
+  const mapped: Message = {
+    _original: JSON.stringify(event),
+    id: event.getId(),
+    timestamp: event.getDate(),
+    senderID,
+    text: '',
+    isSender: userID === senderID,
+    attachments: [],
+    reactions: [],
+  }
 
   const eventType = event.getType()
   texts.log(eventType, event)
   switch (eventType) {
     case 'm.room.encryption': {
-      action = {
+      mapped.action = {
         type: MessageActionType.THREAD_TITLE_UPDATED,
         title: 'Encrypted',
         actorParticipantID: senderID,
       }
-      text = 'Encryption enabled'
+      mapped.text = 'Encryption enabled'
       break
     }
     case 'm.room.member': {
@@ -105,14 +110,14 @@ export function mapMessage(
       let type
       if (membership === 'join') {
         type = MessageActionType.THREAD_PARTICIPANTS_ADDED
-        text = `${senderID} joined the room`
+        mapped.text = `${senderID} joined the room`
       } else if (membership === 'leave') {
         type = MessageActionType.THREAD_PARTICIPANTS_REMOVED
-        text = `${senderID} left the room`
+        mapped.text = `${senderID} left the room`
       } else {
         return null
       }
-      action = {
+      mapped.action = {
         type,
         title: event.getContent().membership,
         actorParticipantID: senderID,
@@ -126,15 +131,15 @@ export function mapMessage(
         if (!redactedBy) {
           return
         }
-        isDeleted = true
-        text = `Message deleted by ${redactedBy}`
+        mapped.isDeleted = true
+        mapped.text = `Message deleted by ${redactedBy}`
         break
       }
       const annotationRelations = room
         .getUnfilteredTimelineSet()
         .getRelationsForEvent(event.getId(), 'm.annotation', 'm.reaction')
       if (annotationRelations) {
-        reactions = annotationRelations.getRelations().map(ev => ({
+        mapped.reactions = annotationRelations.getRelations().map(ev => ({
           id: ev.getId(),
           reactionKey: ev.getRelation().key,
           participantID: ev.getSender(),
@@ -146,15 +151,20 @@ export function mapMessage(
         case 'm.bad.encrypted':
         case 'm.notice':
         case 'm.text': {
-          text = content.body
+          mapped.text = content.body
           if (
             content['m.relates_to']
             && content['m.relates_to']['m.in_reply_to']
           ) {
-            text = stripQuotedMessage(content.body)
-            linkedMessageID = content['m.relates_to']['m.in_reply_to'].event_id
+            mapped.text = stripQuotedMessage(content.body)
+            mapped.linkedMessageID = content['m.relates_to']['m.in_reply_to'].event_id
           }
 
+          if (content.format === 'org.matrix.custom.html') {
+            const { text, textAttributes } = mapTextAttributes(mapped.text)
+            mapped.text = text
+            mapped.textAttributes = textAttributes
+          }
           break
         }
         case 'm.audio':
@@ -162,7 +172,7 @@ export function mapMessage(
         case 'm.image':
         case 'm.video': {
           const srcURL = matrixClient.client.mxcUrlToHttp(content.url)
-          attachments = [
+          mapped.attachments = [
             {
               id: event.getId(),
               type: getAttachmentTypeFromContentType(content.msgtype),
@@ -184,14 +194,14 @@ export function mapMessage(
       let type
       if (prevContent.name) {
         type = MessageActionType.THREAD_TITLE_UPDATED
-        text = `${senderID} changed the room name from ${prevContent.name} to ${
+        mapped.text = `${senderID} changed the room name from ${prevContent.name} to ${
           event.getContent().name
         }`
       } else {
         type = MessageActionType.GROUP_THREAD_CREATED
-        text = `${senderID} created and configured the room`
+        mapped.text = `${senderID} created and configured the room`
       }
-      action = {
+      mapped.action = {
         type,
         title: event.getContent().name,
         actorParticipantID: senderID,
@@ -242,18 +252,6 @@ export function mapMessage(
     }
   }
 
-  return {
-    _original: JSON.stringify(event),
-    id: event.getId(),
-    timestamp: event.getDate(),
-    senderID,
-    text,
-    isSender: userID === senderID,
-    attachments,
-    isAction: !!action,
-    action,
-    isDeleted,
-    reactions,
-    linkedMessageID,
-  }
+  mapped.isAction = !!mapped.action
+  return mapped
 }
