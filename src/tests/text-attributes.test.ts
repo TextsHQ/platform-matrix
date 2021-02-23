@@ -2,9 +2,9 @@ import { mapTextAttributes } from '../text-attributes'
 
 const cases = [
   {
-    text: '\n*italic*\n **bold**\n\n plain <del>st</del>.',
+    text: '\n*italic*\n **bold**\n\n plain <del>st</del> `code`.',
     result: {
-      text: 'italic\nbold\n\nplain st.',
+      text: 'italic\nbold\n\nplain st code.',
       textAttributes: {
         entities: [
           {
@@ -21,6 +21,11 @@ const cases = [
             from: 19,
             to: 21,
             strikethrough: true,
+          },
+          {
+            from: 22,
+            to: 26,
+            code: true,
           },
         ],
       },

@@ -6,7 +6,7 @@ const reader = new Parser({ safe: true })
 // All types: text, softbreak, linebreak, emph, strong, html_inline, link,
 // image, code, document, paragraph, block_quote, item, list, heading,
 // code_block, html_block, thematic_break
-const TOKEN_TYPES = ['emph', 'strong', 'link', 'code']
+const TOKEN_TYPES = ['emph', 'strong', 'link']
 
 export function mapTextAttributes(src: string) {
   if (!src) return
@@ -45,6 +45,13 @@ export function mapTextAttributes(src: string) {
             strikethrough: true,
           })
         }
+      } else if (node.type === 'code') {
+        entities.push({
+          from: output.length,
+          to: output.length + node.literal.length,
+          code: true,
+        })
+        output += node.literal
       } else if (['softbreak', 'linkebreak'].includes(node.type)) {
         output += '\n'
       } else if (node.type === 'text') {
