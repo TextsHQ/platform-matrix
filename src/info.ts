@@ -6,7 +6,6 @@ import {
 } from '@textshq/platform-sdk'
 
 import { supportedReactions } from './constants'
-import { mapMessage } from './mappers'
 
 const { React } = texts
 
@@ -27,7 +26,6 @@ const info: PlatformInfo = {
   deletionMode: MessageDeletionMode.DELETE_FOR_EVERYONE,
   typingDurationMs: 3000,
   attributes: new Set([Attribute.SUPPORTS_QUOTED_MESSAGES]),
-  mapMessage,
 }
 
 export default info
