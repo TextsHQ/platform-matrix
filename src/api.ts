@@ -21,7 +21,7 @@ import {
 import sdk from 'matrix-js-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
 import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
-import { ContentInfo } from './types/matrix'
+import type { ContentInfo } from './types/matrix'
 
 export default class Matrix implements PlatformAPI {
   private readonly matrixClient = new MatrixClient()
@@ -209,7 +209,7 @@ export default class Matrix implements PlatformAPI {
     if (pagination?.direction === 'before') {
       await this.matrixClient.client.scrollback(room, 30)
     }
-    // @ts-ignore
+    // @ts-expect-error
     const hasMore = !!liveTimeline.getState(sdk.EventTimeline.BACKWARDS).paginationToken
     const items = liveTimeline.getEvents()
       .map(event => mapMessage(this.matrixClient, this.userID, room, event))
