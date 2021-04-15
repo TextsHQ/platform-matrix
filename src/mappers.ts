@@ -89,8 +89,6 @@ export function mapMessage(
     senderID,
     text: '',
     isSender: userID === senderID,
-    attachments: [],
-    reactions: [],
   }
 
   const eventType = event.getType()
@@ -241,7 +239,8 @@ export function mapMessage(
             return
           }
           const message = mapMessage(matrixClient, userID, room, origEvent)
-          message.reactions.filter(x => x.id !== event.getAssociatedId())
+          // todo review this is unused:
+          // message.reactions.filter(x => x.id !== event.getAssociatedId())
           return message
         }
         if (redacted.getType() === 'm.room.message') {
