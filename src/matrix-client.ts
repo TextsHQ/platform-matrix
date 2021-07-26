@@ -5,7 +5,7 @@ import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localSto
 import { WebStorageSessionStore } from 'matrix-js-sdk/lib/store/session/webstorage'
 import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
 import { LocalStorage } from 'node-localstorage'
-import { LoginCreds } from '@textshq/platform-sdk'
+import type { LoginCreds } from '@textshq/platform-sdk'
 
 export type MatrixSession = {
   user_id: string

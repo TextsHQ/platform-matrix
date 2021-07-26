@@ -1,6 +1,6 @@
 import { Message, Thread, MessageActionType, MessageAttachmentType, texts } from '@textshq/platform-sdk'
-import MatrixClient from './matrix-client'
 import { mapTextAttributes } from './text-attributes'
+import type MatrixClient from './matrix-client'
 
 const stripAtMark = (name) => name.startsWith('@') ? name.slice(1) : name
 

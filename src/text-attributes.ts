@@ -1,5 +1,5 @@
-import { TextEntity } from '@textshq/platform-sdk'
 import { Parser } from 'commonmark'
+import type { TextEntity } from '@textshq/platform-sdk'
 
 const reader = new Parser({ safe: true })
 
