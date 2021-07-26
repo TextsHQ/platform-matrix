@@ -171,11 +171,11 @@ export default class Matrix implements PlatformAPI {
         }
         return [
           {
-            type: ServerEventType.PARTICIPANT_TYPING,
-            typing: payload.member.typing,
+            type: ServerEventType.USER_ACTIVITY,
+            activityType: payload.member.typing ? ActivityType.TYPING : ActivityType.NONE,
             threadID: payload.member.roomId,
             participantID: payload.member.userId,
-            durationMs: 3000,
+            durationMs: 3000, // todo review
           },
         ]
       }
