@@ -1,6 +1,5 @@
 import { promises as fs } from 'fs'
 import sizeOf from 'image-size'
-import rimraf from 'rimraf'
 import {
   PlatformAPI,
   OnServerEventCallback,
@@ -64,13 +63,10 @@ export default class Matrix implements PlatformAPI {
     }
   }
 
-  logout = () =>
-    new Promise<void>(resolve => {
-      this.dispose()
-      rimraf(this.accountInfo?.dataDirPath, () => {
-        resolve()
-      })
-    })
+  logout = async () => {
+    this.dispose()
+    await fs.rm(this.accountInfo?.dataDirPath, { recursive: true })
+  }
 
   dispose = () => {
     this.matrixClient.client?.stopClient()

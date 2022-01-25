@@ -880,7 +880,6 @@ __metadata:
     node-localstorage: ^2.1.6
     olm: "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz"
     react: "https://github.com/TextsHQ/react-global-shim#main"
-    rimraf: ^3.0.2
     typescript: ^4.1.5
   peerDependencies:
     "@textshq/platform-sdk": "*"
