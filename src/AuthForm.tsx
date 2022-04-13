@@ -1,4 +1,4 @@
-import { PlatformAPI, LoginCreds, texts } from '@textshq/platform-sdk'
+import { texts, AuthProps } from '@textshq/platform-sdk'
 import type { ChangeEvent } from 'react'
 
 const { React } = texts
@@ -18,10 +18,7 @@ function useInput(
   return [value, onChange, setValue]
 }
 
-const AuthForm: React.FC<{
-  api: PlatformAPI
-  login: (creds: LoginCreds) => void
-}> = ({ api, login }) => {
+const AuthForm: React.FC<AuthProps> = ({ login }) => {
   const [server, onServerChange] = useInput('https://matrix.org')
   const [username, onUsernameChange] = useInput()
   const [password, onPasswordChange] = useInput()
