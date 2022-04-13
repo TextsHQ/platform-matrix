@@ -205,7 +205,6 @@ export default class Matrix implements PlatformAPI {
     if (pagination?.direction === 'before') {
       await this.matrixClient.client.scrollback(room, 30)
     }
-    // @ts-expect-error
     const hasMore = !!liveTimeline.getState(sdk.EventTimeline.BACKWARDS).paginationToken
     const items = liveTimeline.getEvents()
       .map(event => mapMessage(this.matrixClient, this.userID, room, event))
