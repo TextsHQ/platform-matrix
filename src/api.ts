@@ -296,7 +296,6 @@ export default class Matrix implements PlatformAPI {
 
   deleteMessage = async (threadID: string, messageID: string) => {
     await this.matrixClient.client.redactEvent(threadID, messageID)
-    return true
   }
 
   sendReadReceipt = async (threadID: string, messageID: string) => {}
