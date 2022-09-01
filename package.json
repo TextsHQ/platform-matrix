@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config",
-    "@textshq/platform-sdk": "link:../platform-sdk",
+    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#main",
     "@types/jest": "^27.4.1",
     "eslint": "^7.20.0",
     "husky": "^4.3.0",

@@ -1131,7 +1131,7 @@ __metadata:
   resolution: "@textshq/platform-matrix@workspace:."
   dependencies:
     "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config"
-    "@textshq/platform-sdk": "link:../platform-sdk"
+    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#main"
     "@types/jest": ^27.4.1
     bluebird: ^3.7.2
     commonmark: ^0.30.0
@@ -1150,11 +1150,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@textshq/platform-sdk@link:../platform-sdk::locator=%40textshq%2Fplatform-matrix%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@textshq/platform-sdk@link:../platform-sdk::locator=%40textshq%2Fplatform-matrix%40workspace%3A."
+"@textshq/platform-sdk@https://github.com/TextsHQ/platform-sdk#main":
+  version: 0.4.4
+  resolution: "@textshq/platform-sdk@https://github.com/TextsHQ/platform-sdk.git#commit=2470f049d59a70fd7a8a433c7b5bb8392eb8b477"
+  dependencies:
+    emoji-regex: ^10.1.0
+    qrcode.react: ^3.1.0
+  checksum: 57c0b00d53f09c1a4bff70ad34ee8c902bcc252c73564103dfff61cbfdfd3ab5aea6cee0df72cdc08796617a5ac6be2b31730770be7d3e893d8866275223cd22
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@tootallnate/once@npm:1":
   version: 1.1.2
@@ -2532,6 +2536,13 @@ __metadata:
   version: 0.8.1
   resolution: "emittery@npm:0.8.1"
   checksum: 2457e8c7b0688bb006126f2c025b2655abe682f66b184954122a8a065b5277f9813d49d627896a10b076b81c513ec5f491fd9c14fbd42c04b95ca3c9f3c365ee
+  languageName: node
+  linkType: hard
+
+"emoji-regex@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "emoji-regex@npm:10.1.0"
+  checksum: 5bc780fc4d75f89369155a87c55f7e83a0bf72bcccda7df7f2c570cde4738d8b17d112d12afdadfec16647d1faef6501307b4304f81d35c823a938fe6547df0f
   languageName: node
   linkType: hard
 
@@ -5553,6 +5564,15 @@ __metadata:
   version: 2.1.1
   resolution: "punycode@npm:2.1.1"
   checksum: 823bf443c6dd14f669984dea25757b37993f67e8d94698996064035edd43bed8a5a17a9f12e439c2b35df1078c6bec05a6c86e336209eb1061e8025c481168e8
+  languageName: node
+  linkType: hard
+
+"qrcode.react@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "qrcode.react@npm:3.1.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 94a2942ecf83f461d869adb20305ae663c6d1abe93ef2c72442b07d756ce70cf6deb6fd588dc5b382b48c6991cfde1dfd5ac9b814c1461e71d5edb2d945e67fc
   languageName: node
   linkType: hard
 
