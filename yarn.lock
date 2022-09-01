@@ -1133,7 +1133,6 @@ __metadata:
     "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config"
     "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#main"
     "@types/jest": ^27.4.1
-    bluebird: ^3.7.2
     commonmark: ^0.30.0
     eslint: ^7.20.0
     image-size: ^1.0.1
@@ -1911,13 +1910,6 @@ __metadata:
   dependencies:
     tweetnacl: ^0.14.3
   checksum: 4edfc9fe7d07019609ccf797a2af28351736e9d012c8402a07120c4453a3b789a15f2ee1530dc49eee8f7eb9379331a8dd4b3766042b9e502f74a68e7f662291
-  languageName: node
-  linkType: hard
-
-"bluebird@npm:^3.7.2":
-  version: 3.7.2
-  resolution: "bluebird@npm:3.7.2"
-  checksum: 869417503c722e7dc54ca46715f70e15f4d9c602a423a02c825570862d12935be59ed9c7ba34a9b31f186c017c23cac6b54e35446f8353059c101da73eac22ef
   languageName: node
   linkType: hard
 
