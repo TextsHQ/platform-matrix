@@ -1,12 +1,11 @@
 import { texts, AuthProps } from '@textshq/platform-sdk'
 import type { ChangeEvent } from 'react'
+import type React from 'react'
 
 const { React } = texts
 const { useState } = React
 
-function useInput(
-  defaultValue = '',
-): [
+function useInput(defaultValue = ''): [
     string,
     (e: ChangeEvent<HTMLInputElement>) => void,
     React.Dispatch<React.SetStateAction<string>>,
