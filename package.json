@@ -13,6 +13,7 @@
     "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz"
   },
   "dependencies": {
+    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#main",
     "commonmark": "^0.30.0",
     "image-size": "^1.0.1",
     "jest": "^27.5.1",
@@ -26,11 +27,10 @@
     "@textshq/platform-sdk": "*"
   },
   "devDependencies": {
-    "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config",
-    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#main",
+    "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config#main",
     "@types/jest": "^27.4.1",
-    "eslint": "^7.20.0",
-    "typescript": "^4.6.4"
+    "eslint": "^8.23.1",
+    "typescript": "^4.8.3"
   },
-  "packageManager": "yarn@3.2.1"
+  "packageManager": "yarn@3.2.3"
 }
