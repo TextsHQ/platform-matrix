@@ -1,4 +1,4 @@
-import { Message, Thread, MessageActionType, MessageAttachmentType, texts } from '@textshq/platform-sdk'
+import { Message, Thread, MessageActionType, AttachmentType, texts } from '@textshq/platform-sdk'
 import { mapTextAttributes } from './text-attributes'
 import type MatrixClient from './matrix-client'
 
@@ -40,10 +40,10 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
 }
 
 const getAttachmentTypeFromContentType = type => ({
-  'm.image': MessageAttachmentType.IMG,
-  'm.audio': MessageAttachmentType.AUDIO,
-  'm.video': MessageAttachmentType.VIDEO,
-}[type] || MessageAttachmentType.UNKNOWN)
+  'm.image': AttachmentType.IMG,
+  'm.audio': AttachmentType.AUDIO,
+  'm.video': AttachmentType.VIDEO,
+}[type] || AttachmentType.UNKNOWN)
 
 export const getContentTypeFromMimeType = (mimeType: string) => {
   const mainType = mimeType.split('/')[0]
