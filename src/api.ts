@@ -16,6 +16,7 @@ import {
   PaginationArg,
   AccountInfo,
   ActivityType,
+  ThreadFolderName,
 } from '@textshq/platform-sdk'
 import sdk from 'matrix-js-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
@@ -193,7 +194,7 @@ export default class Matrix implements PlatformAPI {
 
   createThread = (userIDs: string[]) => null
 
-  getThreads = async (inboxName: InboxName): Promise<Paginated<Thread>> => ({
+  getThreads = async (inboxName: ThreadFolderName): Promise<Paginated<Thread>> => ({
     items: Object.values(this.threads),
     hasMore: false,
     oldestCursor: null,
