@@ -2,7 +2,6 @@
 import './patch-global-olm'
 import sdk from 'matrix-js-sdk'
 import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localStorage-crypto-store'
-import { WebStorageSessionStore } from 'matrix-js-sdk/lib/store/session/webstorage'
 import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
 import { LocalStorage } from 'node-localstorage'
 import type { LoginCreds } from '@textshq/platform-sdk'
@@ -43,8 +42,6 @@ export default class MatrixClient {
       accessToken: session.access_token,
       userId: session.user_id,
       deviceId: session.device_id,
-      unstableClientRelationAggregation: true,
-      sessionStore: new WebStorageSessionStore(localStorage),
       store: new MemoryStore({ localStorage }),
     })
 
@@ -74,7 +71,10 @@ export default class MatrixClient {
     this.client.on(
       'Room.localEchoUpdated',
       (event, room, oldEventId, oldStatus) => {
-        this.onMessage('Room.localEchoUpdated', { room, event, oldEventId })
+        // oldEventId is sometimes a Room object.
+        if (typeof oldEventId === 'string') {
+          this.onMessage('Room.localEchoUpdated', { room, event, oldEventId, oldStatus })
+        }
       },
     )
     this.client.on('RoomMember.typing', (event, member) => {

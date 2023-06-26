@@ -10,17 +10,17 @@
     "test": "jest"
   },
   "nativeDeps": {
-    "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz"
+    "@matrix-org/olm": "^3.2.15"
   },
   "dependencies": {
+    "@matrix-org/olm": "^3.2.15",
     "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#5f2b77daa0449c65b57d4d6326ff890305a17dcf",
     "commonmark": "^0.30.0",
     "image-size": "^1.0.1",
     "jest": "^27.5.1",
     "lodash": "^4.17.21",
-    "matrix-js-sdk": "^17.0.0",
+    "matrix-js-sdk": "^26.1.0",
     "node-localstorage": "^2.2.1",
-    "olm": "https://packages.matrix.org/npm/olm/olm-3.2.1.tgz",
     "react": "https://github.com/TextsHQ/react-global-shim#main"
   },
   "peerDependencies": {

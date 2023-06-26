@@ -116,7 +116,6 @@ export default class Matrix implements PlatformAPI {
             type: ServerEventType.STATE_SYNC,
             objectIDs: {
               threadID: payload.room.roomId,
-              messageID: message.id,
             },
             mutationType: 'upsert',
             objectName: 'message',
@@ -281,7 +280,8 @@ export default class Matrix implements PlatformAPI {
     }
     const annotationRelations = room
       .getUnfilteredTimelineSet()
-      .getRelationsForEvent(messageID, 'm.annotation', 'm.reaction')
+      .relations
+      .getChildEventsForEvent(messageID, 'm.annotation', 'm.reaction')
     const reaction = annotationRelations
       .getRelations()
       .find(
