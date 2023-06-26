@@ -227,7 +227,7 @@ export default class Matrix implements PlatformAPI {
     const pendingMsg: Message = {
       id: '',
       timestamp: new Date(),
-      senderID: 'none',
+      senderID: this.userID,
     }
     if (attachmentBuffer) {
       const url = await this.matrixClient.upload(attachmentBuffer)
