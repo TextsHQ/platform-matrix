@@ -14,7 +14,7 @@ import {
   ServerEventType,
   ServerEvent,
   PaginationArg,
-  AccountInfo,
+  ClientContext,
   ActivityType,
   ThreadFolderName,
 } from '@textshq/platform-sdk'
@@ -32,13 +32,13 @@ export default class Matrix implements PlatformAPI {
 
   private rooms = {}
 
-  private accountInfo: AccountInfo
+  private accountInfo: ClientContext
 
   get userID() {
     return this.session?.user_id
   }
 
-  init = async (session: MatrixSession, accountInfo: AccountInfo) => {
+  init = async (session: MatrixSession, accountInfo: ClientContext) => {
     this.accountInfo = accountInfo
     if (session?.access_token) {
       this.session = session

@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@matrix-org/olm": "^3.2.15",
-    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#5f2b77daa0449c65b57d4d6326ff890305a17dcf",
+    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#bb853b092ef989ef74d36576e01894d81a3c389a",
     "commonmark": "^0.30.0",
     "image-size": "^1.0.1",
     "jest": "^27.5.1",

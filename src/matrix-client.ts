@@ -23,6 +23,7 @@ export default class MatrixClient {
 
   onMessage: Function
 
+  // @ts-expect-error custom
   async login({ custom: server, username: user, password }: LoginCreds) {
     this.client = sdk.createClient({ baseUrl: server })
     try {

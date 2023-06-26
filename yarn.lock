@@ -2473,7 +2473,7 @@ __metadata:
   dependencies:
     "@matrix-org/olm": ^3.2.15
     "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config#main"
-    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#5f2b77daa0449c65b57d4d6326ff890305a17dcf"
+    "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#bb853b092ef989ef74d36576e01894d81a3c389a"
     "@types/eslint": ^8.4.10
     "@types/jest": ^27.4.1
     commonmark: ^0.30.0
@@ -2490,13 +2490,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@textshq/platform-sdk@https://github.com/TextsHQ/platform-sdk#5f2b77daa0449c65b57d4d6326ff890305a17dcf":
+"@textshq/platform-sdk@https://github.com/TextsHQ/platform-sdk#bb853b092ef989ef74d36576e01894d81a3c389a":
   version: 0.4.4
-  resolution: "@textshq/platform-sdk@https://github.com/TextsHQ/platform-sdk.git#commit=5f2b77daa0449c65b57d4d6326ff890305a17dcf"
+  resolution: "@textshq/platform-sdk@https://github.com/TextsHQ/platform-sdk.git#commit=bb853b092ef989ef74d36576e01894d81a3c389a"
   dependencies:
     emoji-regex: ^10.1.0
     qrcode.react: ^3.1.0
-  checksum: b05c5ecd55f5a1e1584c42f74df4895135befb46feb8a15d2bcfd1af34739d622bfe64edd86e295467a14f4ed64bef7392e750fc8bc95a5de75a831daabf39d9
+  checksum: af51b657bead454f21f064400a781cff4f5d2d1094dc45f7ca4f36b5643da8b6c17ef3ccad18c88db3aa3c7f08cac42ad7d35c9ef8ad88189c60f589a012ccd0
   languageName: node
   linkType: hard
 
