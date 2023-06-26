@@ -20,7 +20,7 @@ import {
 } from '@textshq/platform-sdk'
 import sdk from 'matrix-js-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
-import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
+import { mapRoom, mapMessage, getContentTypeFromMimeType, getAttachmentTypeFromContentType } from './mappers'
 import type { ContentInfo } from './types/matrix'
 
 export default class Matrix implements PlatformAPI {
@@ -223,6 +223,11 @@ export default class Matrix implements PlatformAPI {
     } else if (content.fileBuffer) {
       attachmentBuffer = content.fileBuffer
     }
+    const pendingMsg: Message = {
+      id: 'pending',
+      timestamp: new Date(),
+      senderID: 'none',
+    }
     if (attachmentBuffer) {
       const url = await this.matrixClient.upload(attachmentBuffer)
       const msgtype = getContentTypeFromMimeType(content.mimeType)
@@ -244,11 +249,17 @@ export default class Matrix implements PlatformAPI {
         info,
         body: content.text || content.fileName,
       }
+      pendingMsg.attachments = [{
+        id: 'pending',
+        type: getAttachmentTypeFromContentType(msgtype),
+        data: attachmentBuffer,
+      }]
     } else {
       msgContent = {
         msgtype: 'm.text',
         body: content.text,
       }
+      pendingMsg.text = content.text
     }
     if (options.quotedMessageID) {
       msgContent['m.relates_to'] = {
@@ -256,9 +267,11 @@ export default class Matrix implements PlatformAPI {
           event_id: options.quotedMessageID,
         },
       }
+      pendingMsg.linkedMessageID = options.quotedMessageID
     }
-    await this.matrixClient.client.sendMessage(threadID, msgContent)
-    return true
+    const { event_id } = await this.matrixClient.client.sendMessage(threadID, msgContent)
+    pendingMsg.id = event_id
+    return [pendingMsg]
   }
 
 

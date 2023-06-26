@@ -39,7 +39,7 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   }
 }
 
-const getAttachmentTypeFromContentType = type => ({
+export const getAttachmentTypeFromContentType = type => ({
   'm.image': AttachmentType.IMG,
   'm.audio': AttachmentType.AUDIO,
   'm.video': AttachmentType.VIDEO,
