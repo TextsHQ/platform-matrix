@@ -1,4 +1,5 @@
-import { promises as fs } from 'fs'
+import { randomUUID } from 'crypto'
+import fs from 'fs/promises'
 import sizeOf from 'image-size'
 import {
   PlatformAPI,
@@ -224,7 +225,7 @@ export default class Matrix implements PlatformAPI {
       attachmentBuffer = content.fileBuffer
     }
     const pendingMsg: Message = {
-      id: 'pending',
+      id: '',
       timestamp: new Date(),
       senderID: 'none',
     }
@@ -250,7 +251,7 @@ export default class Matrix implements PlatformAPI {
         body: content.text || content.fileName,
       }
       pendingMsg.attachments = [{
-        id: 'pending',
+        id: randomUUID(),
         type: getAttachmentTypeFromContentType(msgtype),
         data: attachmentBuffer,
       }]

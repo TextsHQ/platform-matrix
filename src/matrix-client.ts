@@ -1,5 +1,6 @@
+import olm from '@matrix-org/olm'
 // global.Olm needs to be loaded before matrix-js-sdk
-import './patch-global-olm'
+global.Olm = olm
 import sdk from 'matrix-js-sdk'
 import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localStorage-crypto-store'
 import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
@@ -23,11 +24,10 @@ export default class MatrixClient {
 
   onMessage: Function
 
-  // @ts-expect-error custom
-  async login({ custom: server, username: user, password }: LoginCreds) {
-    this.client = sdk.createClient({ baseUrl: server })
+  async login(creds: LoginCreds) {
+    this.client = sdk.createClient({ baseUrl: creds['custom'] })
     try {
-      const res = await this.client.login('m.login.password', { user, password })
+      const res = await this.client.login('m.login.password', { user: creds['user'], password: creds['password'] })
       return res
     } catch (e) {
       return e.data

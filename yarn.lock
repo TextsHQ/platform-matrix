@@ -2476,6 +2476,7 @@ __metadata:
     "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#bb853b092ef989ef74d36576e01894d81a3c389a"
     "@types/eslint": ^8.4.10
     "@types/jest": ^27.4.1
+    "@types/node": ^20.3.2
     commonmark: ^0.30.0
     eslint: ^8.30.0
     image-size: ^1.0.1
@@ -2647,6 +2648,13 @@ __metadata:
   version: 14.14.31
   resolution: "@types/node@npm:14.14.31"
   checksum: 5b9ab3660ee63abc57affc836c0d50b2941a862c5b6c241c02762d8e1ad610f6b0d350d7426218dc401b5abc7d6294ee1b475da7c331e486d59a5608d1a0b777
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.3.2":
+  version: 20.3.2
+  resolution: "@types/node@npm:20.3.2"
+  checksum: 5929ce2b9b12b1e2a2304a0921a953c72a81f5753ad39ac43b99ce6312fbb2b4fb5bc6b60d64a2550704e3223cd5de1299467d36085ac69888899db978f2653a
   languageName: node
   linkType: hard
 

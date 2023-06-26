@@ -30,6 +30,7 @@
     "@textshq/eslint-config": "https://github.com/TextsHQ/eslint-config#main",
     "@types/eslint": "^8.4.10",
     "@types/jest": "^27.4.1",
+    "@types/node": "^20.3.2",
     "eslint": "^8.30.0",
     "typescript": "^5.0.2"
   },
