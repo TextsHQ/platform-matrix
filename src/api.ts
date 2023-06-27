@@ -225,7 +225,7 @@ export default class Matrix implements PlatformAPI {
       attachmentBuffer = content.fileBuffer
     }
     const pendingMsg: Message = {
-      id: '',
+      id: undefined,
       timestamp: new Date(),
       senderID: this.userID,
     }
