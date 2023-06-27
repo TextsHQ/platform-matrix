@@ -1,6 +1,5 @@
-import olm from '@matrix-org/olm'
 // global.Olm needs to be loaded before matrix-js-sdk
-global.Olm = olm
+import './patch-global-olm'
 import sdk from 'matrix-js-sdk'
 import { LocalStorageCryptoStore } from 'matrix-js-sdk/lib/crypto/store/localStorage-crypto-store'
 import { MemoryStore } from 'matrix-js-sdk/lib/store/memory'
