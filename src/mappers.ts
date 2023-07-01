@@ -39,7 +39,7 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   }
 }
 
-const getAttachmentTypeFromContentType = type => ({
+export const getAttachmentTypeFromContentType = type => ({
   'm.image': AttachmentType.IMG,
   'm.audio': AttachmentType.AUDIO,
   'm.video': AttachmentType.VIDEO,
@@ -135,10 +135,11 @@ export function mapMessage(
       }
       const annotationRelations = room
         .getUnfilteredTimelineSet()
-        .getRelationsForEvent(event.getId(), 'm.annotation', 'm.reaction')
+        .relations
+        .getChildEventsForEvent(event.getId(), 'm.annotation', 'm.reaction')
       if (annotationRelations) {
         mapped.reactions = annotationRelations.getRelations().map(ev => ({
-          id: ev.getId(),
+          id: ev.getSender(),
           reactionKey: ev.getRelation().key,
           participantID: ev.getSender(),
           emoji: true,

@@ -1,3 +1,3 @@
-import olm from 'olm'
+import olm from '@matrix-org/olm'
 
 global.Olm = olm

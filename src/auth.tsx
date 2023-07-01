@@ -1,8 +1,8 @@
-import { texts, AuthProps } from '@textshq/platform-sdk'
+import { textsRenderer, AuthProps } from '@textshq/platform-sdk'
 import type { ChangeEvent } from 'react'
 import type React from 'react'
 
-const { React } = texts
+const { React } = textsRenderer
 const { useState } = React
 
 function useInput(defaultValue = ''): [

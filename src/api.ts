@@ -1,4 +1,5 @@
-import { promises as fs } from 'fs'
+import { randomUUID } from 'crypto'
+import fs from 'fs/promises'
 import sizeOf from 'image-size'
 import {
   PlatformAPI,
@@ -14,14 +15,23 @@ import {
   ServerEventType,
   ServerEvent,
   PaginationArg,
-  AccountInfo,
+  ClientContext,
   ActivityType,
   ThreadFolderName,
 } from '@textshq/platform-sdk'
 import sdk from 'matrix-js-sdk'
 import MatrixClient, { MatrixSession } from './matrix-client'
-import { mapRoom, mapMessage, getContentTypeFromMimeType } from './mappers'
+import { mapRoom, mapMessage, getContentTypeFromMimeType, getAttachmentTypeFromContentType } from './mappers'
 import type { ContentInfo } from './types/matrix'
+
+function createPromise<T>() {
+  let promiseResolve: (value: T | PromiseLike<T>) => void
+  const promise = new Promise<T>(resolve => { promiseResolve = resolve })
+  return {
+    resolve: promiseResolve,
+    promise,
+  }
+}
 
 export default class Matrix implements PlatformAPI {
   private readonly matrixClient = new MatrixClient()
@@ -32,13 +42,15 @@ export default class Matrix implements PlatformAPI {
 
   private rooms = {}
 
-  private accountInfo: AccountInfo
+  private accountInfo: ClientContext
+
+  private prepared = createPromise<void>()
 
   get userID() {
     return this.session?.user_id
   }
 
-  init = async (session: MatrixSession, accountInfo: AccountInfo) => {
+  init = async (session: MatrixSession, accountInfo: ClientContext) => {
     this.accountInfo = accountInfo
     if (session?.access_token) {
       this.session = session
@@ -80,6 +92,16 @@ export default class Matrix implements PlatformAPI {
 
   mapEvents = async (type, payload): Promise<ServerEvent[]> => {
     switch (type) {
+      case 'prepared': {
+        for (const data of this.matrixClient.client.getRooms()) {
+          const room = mapRoom(this.matrixClient, this.userID, data)
+          this.threads[room.id] = room
+          this.rooms[room.id] = data
+        }
+        this.prepared.resolve()
+        break
+      }
+
       case 'Room': {
         const room = mapRoom(this.matrixClient, this.userID, payload)
         this.threads[room.id] = room
@@ -116,7 +138,6 @@ export default class Matrix implements PlatformAPI {
             type: ServerEventType.STATE_SYNC,
             objectIDs: {
               threadID: payload.room.roomId,
-              messageID: message.id,
             },
             mutationType: 'upsert',
             objectName: 'message',
@@ -194,11 +215,15 @@ export default class Matrix implements PlatformAPI {
 
   createThread = (userIDs: string[]) => null
 
-  getThreads = async (inboxName: ThreadFolderName): Promise<Paginated<Thread>> => ({
-    items: Object.values(this.threads),
-    hasMore: false,
-    oldestCursor: null,
-  })
+  getThreads = async (inboxName: ThreadFolderName): Promise<Paginated<Thread>> => {
+    await this.prepared.promise
+
+    return {
+      items: Object.values(this.threads),
+      hasMore: false,
+      oldestCursor: null,
+    }
+  }
 
   getMessages = async (threadID: string, pagination: PaginationArg): Promise<Paginated<Message>> => {
     const room = this.rooms[threadID]
@@ -224,6 +249,11 @@ export default class Matrix implements PlatformAPI {
     } else if (content.fileBuffer) {
       attachmentBuffer = content.fileBuffer
     }
+    const pendingMsg: Message = {
+      id: undefined,
+      timestamp: new Date(),
+      senderID: this.userID,
+    }
     if (attachmentBuffer) {
       const url = await this.matrixClient.upload(attachmentBuffer)
       const msgtype = getContentTypeFromMimeType(content.mimeType)
@@ -245,11 +275,17 @@ export default class Matrix implements PlatformAPI {
         info,
         body: content.text || content.fileName,
       }
+      pendingMsg.attachments = [{
+        id: randomUUID(),
+        type: getAttachmentTypeFromContentType(msgtype),
+        data: attachmentBuffer,
+      }]
     } else {
       msgContent = {
         msgtype: 'm.text',
         body: content.text,
       }
+      pendingMsg.text = content.text
     }
     if (options.quotedMessageID) {
       msgContent['m.relates_to'] = {
@@ -257,9 +293,11 @@ export default class Matrix implements PlatformAPI {
           event_id: options.quotedMessageID,
         },
       }
+      pendingMsg.linkedMessageID = options.quotedMessageID
     }
-    await this.matrixClient.client.sendMessage(threadID, msgContent)
-    return true
+    const { event_id } = await this.matrixClient.client.sendMessage(threadID, msgContent)
+    pendingMsg.id = event_id
+    return [pendingMsg]
   }
 
 
@@ -281,7 +319,8 @@ export default class Matrix implements PlatformAPI {
     }
     const annotationRelations = room
       .getUnfilteredTimelineSet()
-      .getRelationsForEvent(messageID, 'm.annotation', 'm.reaction')
+      .relations
+      .getChildEventsForEvent(messageID, 'm.annotation', 'm.reaction')
     const reaction = annotationRelations
       .getRelations()
       .find(
