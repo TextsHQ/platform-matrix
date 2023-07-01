@@ -24,6 +24,15 @@ import MatrixClient, { MatrixSession } from './matrix-client'
 import { mapRoom, mapMessage, getContentTypeFromMimeType, getAttachmentTypeFromContentType } from './mappers'
 import type { ContentInfo } from './types/matrix'
 
+function createPromise<T>() {
+  let promiseResolve: (value: T | PromiseLike<T>) => void
+  const promise = new Promise<T>(resolve => { promiseResolve = resolve })
+  return {
+    resolve: promiseResolve,
+    promise,
+  }
+}
+
 export default class Matrix implements PlatformAPI {
   private readonly matrixClient = new MatrixClient()
 
@@ -34,6 +43,8 @@ export default class Matrix implements PlatformAPI {
   private rooms = {}
 
   private accountInfo: ClientContext
+
+  private prepared = createPromise<void>()
 
   get userID() {
     return this.session?.user_id
@@ -81,6 +92,16 @@ export default class Matrix implements PlatformAPI {
 
   mapEvents = async (type, payload): Promise<ServerEvent[]> => {
     switch (type) {
+      case 'prepared': {
+        for (const data of this.matrixClient.client.getRooms()) {
+          const room = mapRoom(this.matrixClient, this.userID, data)
+          this.threads[room.id] = room
+          this.rooms[room.id] = data
+        }
+        this.prepared.resolve()
+        break
+      }
+
       case 'Room': {
         const room = mapRoom(this.matrixClient, this.userID, payload)
         this.threads[room.id] = room
@@ -194,11 +215,15 @@ export default class Matrix implements PlatformAPI {
 
   createThread = (userIDs: string[]) => null
 
-  getThreads = async (inboxName: ThreadFolderName): Promise<Paginated<Thread>> => ({
-    items: Object.values(this.threads),
-    hasMore: false,
-    oldestCursor: null,
-  })
+  getThreads = async (inboxName: ThreadFolderName): Promise<Paginated<Thread>> => {
+    await this.prepared.promise
+
+    return {
+      items: Object.values(this.threads),
+      hasMore: false,
+      oldestCursor: null,
+    }
+  }
 
   getMessages = async (threadID: string, pagination: PaginationArg): Promise<Paginated<Message>> => {
     const room = this.rooms[threadID]
