@@ -61,8 +61,9 @@ export default class MatrixClient {
   }
 
   onPrepared() {
-    const rooms = this.client.getRooms()
-    rooms.forEach(room => {
+    this.onMessage('prepared')
+
+    this.client.on('Room', (event, room) => {
       this.onMessage('Room', room)
     })
     this.client.on('Room.timeline', (event, room, toStartOfTimeline) => {
