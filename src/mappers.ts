@@ -250,6 +250,10 @@ export function mapMessage(
       }
       return
     }
+    case 'org.matrix.msc3381.poll.start':
+    case 'org.matrix.msc3381.poll.response': {
+      mapped.isHidden = true
+    }
   }
 
   mapped.isAction = !!mapped.action

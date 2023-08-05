@@ -93,7 +93,7 @@ export default class Matrix implements PlatformAPI {
   mapEvents = async (type, payload): Promise<ServerEvent[]> => {
     switch (type) {
       case 'prepared': {
-        for (const data of this.matrixClient.client.getRooms()) {
+        for (const data of this.matrixClient.client.getVisibleRooms()) {
           const room = mapRoom(this.matrixClient, this.userID, data)
           this.threads[room.id] = room
           this.rooms[room.id] = data
