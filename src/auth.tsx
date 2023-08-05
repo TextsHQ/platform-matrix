@@ -21,9 +21,11 @@ const AuthForm: React.FC<AuthProps> = ({ login }) => {
   const [server, onServerChange] = useInput('https://matrix.org')
   const [username, onUsernameChange] = useInput()
   const [password, onPasswordChange] = useInput()
-  const loading = false
-  const onLoginClick = () => {
-    login({ username, password, custom: server })
+  const [loading, setLoading] = useState(false)
+  const onLoginClick = async () => {
+    setLoading(true)
+    await login({ username, password, custom: server })
+    setLoading(false)
   }
   return (
     <form onSubmit={onLoginClick}>
@@ -44,7 +46,7 @@ const AuthForm: React.FC<AuthProps> = ({ login }) => {
         <input type="password" onChange={onPasswordChange} value={password} />
       </label>
       <label>
-        <button type="submit">{loading ? '...' : 'Login to Matrix'}</button>
+        <button type="submit" disabled={loading}>{loading ? '...' : 'Login to Matrix'}</button>
       </label>
     </form>
   )

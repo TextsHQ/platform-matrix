@@ -26,7 +26,7 @@ export default class MatrixClient {
   async login(creds: LoginCreds) {
     this.client = sdk.createClient({ baseUrl: creds['custom'] })
     try {
-      const res = await this.client.login('m.login.password', { user: creds['user'], password: creds['password'] })
+      const res = await this.client.login('m.login.password', { user: creds['username'], password: creds['password'] })
       return res
     } catch (e) {
       return e.data
