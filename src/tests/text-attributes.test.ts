@@ -69,7 +69,7 @@ const cases = [
             to: 22,
             pre: true,
             code: true,
-            codeLanguage: 'js'
+            codeLanguage: 'js',
           },
         ],
       },

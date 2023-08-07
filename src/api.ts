@@ -300,7 +300,6 @@ export default class Matrix implements PlatformAPI {
     return [pendingMsg]
   }
 
-
   addReaction = async (threadID: string, messageID: string, reactionKey: string) => {
     const msgContent = {
       'm.relates_to': {

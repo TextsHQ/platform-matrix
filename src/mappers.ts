@@ -1,8 +1,9 @@
 import { Message, Thread, MessageActionType, AttachmentType, texts } from '@textshq/platform-sdk'
 import { mapTextAttributes } from './text-attributes'
 import type MatrixClient from './matrix-client'
+import { getSenderName, textForGuestAccessEvent, textForHistoryVisibilityEvent, textForJoinRulesEvent, textForPowerEvent } from './textForEvent'
 
-const stripAtMark = (name) => name.startsWith('@') ? name.slice(1) : name
+const stripAtMark = name => (name.startsWith('@') ? name.slice(1) : name)
 
 const AVATAR_WIDTH = 64
 const AVATAR_HEIGHT = 64
@@ -12,7 +13,7 @@ export function mapRoom(matrixClient: MatrixClient, userID, room): Thread {
   const participantItems = room.currentState.getMembers().slice(0, 512).map(member => ({
     id: member.userId,
     username: stripAtMark(member.name),
-    imgURL: member.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'crop')
+    imgURL: member.getAvatarUrl(baseUrl, AVATAR_WIDTH, AVATAR_HEIGHT, 'crop'),
   }))
   const messages = room.timeline
     .map(event => mapMessage(matrixClient, userID, room, event))
@@ -185,6 +186,8 @@ export function mapMessage(
           ]
           break
         }
+        default:
+          break
       }
       break
     }
@@ -223,6 +226,35 @@ export function mapMessage(
       const message = mapMessage(matrixClient, userID, room, origEvent)
       return message
     }
+    case 'm.room.create': {
+      mapped.isAction = true
+      const roomName = matrixClient.client.getRoom(event.getRoomId())?.name
+      mapped.text = `${getSenderName(event)} created room ${roomName}`
+      break
+    }
+    case 'm.room.guest_access': {
+      mapped.isAction = true
+      mapped.text = textForGuestAccessEvent(event)
+      break
+    }
+    case 'm.room.history_visibility': {
+      mapped.isAction = true
+      mapped.text = textForHistoryVisibilityEvent(event)
+      break
+    }
+    case 'm.room.join_rules': {
+      mapped.isAction = true
+      mapped.text = textForJoinRulesEvent(event)
+      break
+    }
+    case 'm.room.power_levels': {
+      mapped.isAction = true
+      mapped.text = textForPowerEvent(event, matrixClient.client)
+      if (!mapped.text) {
+        mapped.isHidden = true
+      }
+      break
+    }
     case 'm.room.redaction': {
       if (!fresh) {
         // Handled by event.isRedacted in m.room.message
@@ -250,12 +282,20 @@ export function mapMessage(
       }
       return
     }
+    case 'm.room.topic': {
+      mapped.isAction = true
+      mapped.text = `${getSenderName(event)} changed the topic to ${event.getContent().topic}`
+      break
+    }
     case 'org.matrix.msc3381.poll.start':
     case 'org.matrix.msc3381.poll.response': {
       mapped.isHidden = true
+      break
     }
+    default:
+      break
   }
 
-  mapped.isAction = !!mapped.action
+  mapped.isAction = mapped.isAction || !!mapped.action
   return mapped
 }
