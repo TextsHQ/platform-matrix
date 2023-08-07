@@ -16,7 +16,7 @@ export function mapTextAttributes(src: string) {
   let output = ''
   const entities: TextEntity[] = []
 
-  let tokenStack = []
+  const tokenStack = []
   let event
   while ((event = walker.next())) {
     const { node } = event
