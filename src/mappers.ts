@@ -228,27 +228,32 @@ export function mapMessage(
     }
     case 'm.room.create': {
       mapped.isAction = true
+      mapped.parseTemplate = true
       const roomName = matrixClient.client.getRoom(event.getRoomId())?.name
       mapped.text = `${getSenderName(event)} created room ${roomName}`
       break
     }
     case 'm.room.guest_access': {
       mapped.isAction = true
+      mapped.parseTemplate = true
       mapped.text = textForGuestAccessEvent(event)
       break
     }
     case 'm.room.history_visibility': {
       mapped.isAction = true
+      mapped.parseTemplate = true
       mapped.text = textForHistoryVisibilityEvent(event)
       break
     }
     case 'm.room.join_rules': {
       mapped.isAction = true
+      mapped.parseTemplate = true
       mapped.text = textForJoinRulesEvent(event)
       break
     }
     case 'm.room.power_levels': {
       mapped.isAction = true
+      mapped.parseTemplate = true
       mapped.text = textForPowerEvent(event, matrixClient.client)
       if (!mapped.text) {
         mapped.isHidden = true
@@ -284,6 +289,7 @@ export function mapMessage(
     }
     case 'm.room.topic': {
       mapped.isAction = true
+      mapped.parseTemplate = true
       mapped.text = `${getSenderName(event)} changed the topic to ${event.getContent().topic}`
       break
     }

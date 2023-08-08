@@ -23,7 +23,8 @@ function textualPowerLevel(level: number, usersDefault: number): string {
 }
 
 export function getSenderName(event: MatrixEvent): string {
-  return event.sender?.name ?? event.getSender() ?? 'Someone'
+  const sender = event.sender?.name ?? event.getSender()
+  return sender ? `{{${sender}}}` : 'Someone'
 }
 
 function getRoomMemberDisplayname(
