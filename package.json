@@ -9,17 +9,13 @@
     "lint": "eslint src --ext ts,tsx,js,jsx --cache",
     "test": "jest"
   },
-  "nativeDeps": {
-    "@matrix-org/olm": "^3.2.15"
-  },
   "dependencies": {
-    "@matrix-org/olm": "^3.2.15",
     "@textshq/platform-sdk": "https://github.com/TextsHQ/platform-sdk#bb853b092ef989ef74d36576e01894d81a3c389a",
     "commonmark": "^0.30.0",
     "image-size": "^1.0.1",
     "jest": "^27.5.1",
     "lodash": "^4.17.21",
-    "matrix-js-sdk": "^26.1.0",
+    "matrix-js-sdk": "^28.2.0",
     "node-localstorage": "^2.2.1",
     "react": "https://github.com/TextsHQ/react-global-shim#main"
   },
